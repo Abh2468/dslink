@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS touch injection test</title>
+<style>
+  body{margin:0;padding:20px;background:#14161b;color:#e9ebee;font:14px/1.6 system-ui,sans-serif;}
+  h1{font-size:17px;margin:0 0 4px;}
+  p.sub{color:#7d8391;font-size:13px;margin:0 0 18px;max-width:720px;}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;}
+  #game{width:384px;height:576px;background:#000;border:2px solid #4c7cff;border-radius:6px;}
+  .panel{flex:1;min-width:320px;}
+  button{background:#3f6fe0;color:#fff;border:none;border-radius:8px;padding:10px 14px;
+    font-size:13px;font-weight:600;cursor:pointer;margin:0 6px 6px 0;}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  input[type=file]{width:100%;background:#12151a;border:1px solid #2c303a;color:#e9ebee;
+    border-radius:8px;padding:9px;margin-bottom:10px;}
+  pre{background:#12151a;border:1px solid #2c303a;border-radius:8px;padding:12px;
+    font:11px/1.5 ui-monospace,monospace;color:#9aa0a9;height:300px;overflow:auto;white-space:pre-wrap;margin:0;}
+  .step{background:#1b1e24;border:1px solid #2c303a;border-radius:10px;padding:14px;margin-bottom:12px;}
+  .step b{color:#e9ebee;}
+  code{background:#12151a;padding:1px 5px;border-radius:4px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<h1>DS touch injection test</h1>
+<p class="sub">
+  This isolates one question: <b>do synthetic mouse events reach the DS core at all?</b>
+  Everything else (phone, network, screen cropping) is removed. The emulator canvas is fully
+  visible here — both DS screens, unhidden and unclipped.
+</p>
+
+<div class="row">
+  <div>
+    <div id="game"></div>
+  </div>
+
+  <div class="panel">
+    <div class="step">
+      <b>Step 1.</b> Load a DS ROM (and BIOS zip if your game needs one), then press Start.
+      <div style="margin-top:10px;">
+        <input type="file" id="rom" accept=".nds,.zip">
+        <input type="file" id="bios" accept=".zip">
+        <button id="start" disabled>Start emulator</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <b>Step 2 — control test.</b> Once the game is running, click directly on the
+      <b>lower</b> screen with your real mouse. If the game responds, real mouse input works.
+      <div style="margin-top:8px;color:#7d8391;font-size:12px;">
+        If this does <i>not</i> work, the core isn't taking stylus input at all and no
+        injection method will help.
+      </div>
+    </div>
+
+    <div class="step">
+      <b>Step 3 — injection test.</b> Now inject a synthetic tap at the same spot without
+      touching the mouse. Move your cursor away from the canvas first.
+      <div style="margin-top:10px;">
+        <button id="injectCenter" disabled>Inject tap: lower screen centre</button>
+        <button id="injectFollow" disabled>Inject tap: where I last clicked</button>
+      </div>
+      <div style="margin-top:8px;color:#7d8391;font-size:12px;">
+        Real click works but injection doesn't → the core ignores untrusted events, and the
+        two-device design needs a different approach. Both work → the bug is elsewhere in the
+        main page (cropping or the network path), not the injection.
+      </div>
+    </div>
+
+    <pre id="log">ready.</pre>
+  </div>
+</div>
+
+<script>
+(() => {
+  const logEl = document.getElementById('log');
+  const log = (m) => {
+    logEl.textContent += '\n' + m;
+    logEl.scrollTop = logEl.scrollHeight;
+  };
+
+  let romURL = null, biosURL = null, canvas = null, lastRealClick = null;
+
+  document.getElementById('rom').addEventListener('change', (e) => {
+    if (e.target.files[0]) {
+      romURL = URL.createObjectURL(e.target.files[0]);
+      document.getElementById('start').disabled = false;
+      log('ROM loaded: ' + e.target.files[0].name);
+    }
+  });
+  document.getElementById('bios').addEventListener('change', (e) => {
+    if (e.target.files[0]) { biosURL = URL.createObjectURL(e.target.files[0]); log('BIOS loaded.'); }
+  });
+
+  document.getElementById('start').addEventListener('click', () => {
+    document.getElementById('start').disabled = true;
+    log('starting core…');
+    window.EJS_player = '#game';
+    window.EJS_core = 'nds';
+    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+    window.EJS_gameUrl = romURL;
+    if (biosURL) window.EJS_biosUrl = biosURL;
+    window.EJS_startOnLoaded = true;
+    if (self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined') {
+      window.EJS_threads = true;
+      log('cross-origin isolated: threaded core ENABLED');
+    } else {
+      log('NOT cross-origin isolated: single-threaded (slow)');
+    }
+    window.EJS_onGameStart = () => { log('game started.'); findCanvas(); };
+    const s = document.createElement('script');
+    s.src = window.EJS_pathtodata + 'loader.js';
+    document.body.appendChild(s);
+  });
+
+  function findCanvas(tries = 0) {
+    const list = [...document.querySelectorAll('#game canvas')]
+      .sort((a, b) => (b.width * b.height) - (a.width * a.height));
+    canvas = list[0];
+    if (!canvas || !canvas.width) {
+      if (tries < 50) return setTimeout(() => findCanvas(tries + 1), 200);
+      log('ERROR: no canvas found.');
+      return;
+    }
+    const r = canvas.getBoundingClientRect();
+    log('canvas found: buffer ' + canvas.width + 'x' + canvas.height +
+        ', on-screen ' + Math.round(r.width) + 'x' + Math.round(r.height));
+    log('canvases in #game: ' + list.length);
+    document.getElementById('injectCenter').disabled = false;
+
+    // Watch real clicks so we can replay the exact same coordinates synthetically.
+    canvas.addEventListener('mousedown', (e) => {
+      if (!e.isTrusted) return;
+      lastRealClick = { x: e.clientX, y: e.clientY };
+      document.getElementById('injectFollow').disabled = false;
+      const rr = canvas.getBoundingClientRect();
+      log('REAL mousedown @ client ' + Math.round(e.clientX) + ',' + Math.round(e.clientY) +
+          '  -> canvas px ' +
+          Math.round((e.clientX - rr.left) / rr.width * canvas.width) + ',' +
+          Math.round((e.clientY - rr.top) / rr.height * canvas.height));
+    });
+  }
+
+  // Same injection sequence the main page uses.
+  function injectTap(clientX, clientY) {
+    if (!canvas) return;
+    const fire = (pType, mType, buttons) => {
+      const opts = {
+        clientX, clientY, screenX: clientX, screenY: clientY,
+        pageX: clientX + scrollX, pageY: clientY + scrollY,
+        bubbles: true, cancelable: true, composed: true, view: window, detail: 1,
+        pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons,
+      };
+      try { canvas.dispatchEvent(new PointerEvent(pType, opts)); } catch (_) {}
+      try { canvas.dispatchEvent(new MouseEvent(mType, opts)); } catch (_) {}
+      try { document.dispatchEvent(new MouseEvent(mType, opts)); } catch (_) {}
+    };
+    log('injecting tap @ ' + Math.round(clientX) + ',' + Math.round(clientY) + ' …');
+    fire('pointermove', 'mousemove', 0);
+    fire('pointerdown', 'mousedown', 1);
+    setTimeout(() => {
+      fire('pointermove', 'mousemove', 1);
+      setTimeout(() => {
+        fire('pointerup', 'mouseup', 0);
+        log('injection sequence complete (move->down->move->up).');
+      }, 60);
+    }, 60);
+  }
+
+  document.getElementById('injectCenter').addEventListener('click', () => {
+    const r = canvas.getBoundingClientRect();
+    // lower screen = bottom half of a vertically stacked DS canvas
+    injectTap(r.left + r.width * 0.5, r.top + r.height * 0.75);
+  });
+  document.getElementById('injectFollow').addEventListener('click', () => {
+    if (!lastRealClick) return;
+    injectTap(lastRealClick.x, lastRealClick.y);
+  });
+})();
+</script>
+</body>
+</html>

@@ -751,6 +751,12 @@
       if (biosURL) window.EJS_biosUrl = biosURL;
       window.EJS_startOnLoaded = true;
       window.EJS_backgroundColor = '#000';
+      // Threaded cores are dramatically faster for DS, but need SharedArrayBuffer, which
+      // only exists when the page is served cross-origin isolated (COOP+COEP headers).
+      // See the header config files shipped alongside this page.
+      if (self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined') {
+        window.EJS_threads = true;
+      }
       window.EJS_VirtualGamepadSettings = [];
       window.EJS_onGameStart = () => {
         hingeStatus.textContent = 'game running — locating screen…';
@@ -783,11 +789,16 @@
     // per frame is what made emulation stutter, so the bottom screen (which only feeds the
     // phone's video stream) is refreshed at a capped rate instead of every frame.
     let lastBottomDraw = 0;
+    let fpsFrames = 0, fpsLast = performance.now(), measuredFps = 0;
     function renderLoop(now) {
+      fpsFrames++;
+      if (now - fpsLast >= 1000) { measuredFps = fpsFrames; fpsFrames = 0; fpsLast = now; }
       if (srcCanvas && srcCanvas.width) {
         const r = getRegions(srcCanvas);
         topCtx.drawImage(srcCanvas, r.top.sx, r.top.sy, r.top.sw, r.top.sh, 0, 0, topCanvas.width, topCanvas.height);
-        if (bottomCtx && (now - lastBottomDraw) >= (1000 / BOTTOM_FPS)) {
+        // No phone attached => nobody is watching the bottom screen, so skip the copy
+        // entirely rather than paying for a GPU readback every frame for nothing.
+        if (bottomCtx && controllerPeerId && (now - lastBottomDraw) >= (1000 / BOTTOM_FPS)) {
           lastBottomDraw = now;
           bottomCtx.drawImage(srcCanvas, r.bottom.sx, r.bottom.sy, r.bottom.sw, r.bottom.sh, 0, 0, bottomCanvas.width, bottomCanvas.height);
         }
@@ -941,6 +952,12 @@
              ? ` (last ${lastTouchMsg.state} ${lastTouchMsg.xf.toFixed(2)},${lastTouchMsg.yf.toFixed(2)})` : ''),
         'last inject  : ' + (lastInject
              ? `${lastInject.type} as ${lastInject.ptype} @ ${lastInject.x},${lastInject.y}` : 'none yet'),
+        '--- performance ---',
+        'display loop : ' + measuredFps + ' fps',
+        'crossOriginIsolated: ' + (self.crossOriginIsolated ? 'YES' : 'NO  <-- fix this for speed'),
+        'SharedArrayBuffer  : ' + (typeof SharedArrayBuffer !== 'undefined' ? 'available' : 'MISSING'),
+        'threaded core: ' + (window.EJS_threads ? 'enabled' : 'disabled (single-threaded = slow)'),
+        'cpu threads  : ' + (navigator.hardwareConcurrency || '?'),
       ].join('\n');
     }, 500);
 
