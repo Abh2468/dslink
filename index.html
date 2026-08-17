@@ -943,24 +943,48 @@
       const rect = srcCanvas.getBoundingClientRect();
       if (!rect.width || !rect.height) return; // canvas not laid out yet
 
-      // Apply calibration in normalized space first.
+      // Guard the inputs. If a message ever arrives without usable numbers, bailing out is
+      // essential: clientX/clientY in MouseEventInit are `long`, so a NaN silently becomes
+      // 0 and every tap lands in the top-left corner instead of failing visibly.
+      if (!Number.isFinite(xf) || !Number.isFinite(yf)) {
+        setInputDiag('bad touch coords: ' + xf + ',' + yf);
+        return;
+      }
+
+      // Apply calibration in normalized space.
       let cx = 0.5 + (xf - 0.5) * tmap.scaleX + tmap.offX;
       let cy = 0.5 + (yf - 0.5) * tmap.scaleY + tmap.offY;
       cx = Math.min(1, Math.max(0, cx));
       cy = Math.min(1, Math.max(0, cy));
 
-      let sx, sy;
-      if (tmap.mode === 'full') {
-        // Whole canvas is the touch surface.
-        sx = cx * srcCanvas.width;
-        sy = cy * srcCanvas.height;
-      } else {
-        const bot = getRegions(srcCanvas).bottom;
-        sx = bot.sx + cx * bot.sw;
-        sy = bot.sy + cy * bot.sh;
+      // Work entirely in the canvas's on-screen rect. The old version scaled through
+      // srcCanvas.width/height, which divides by zero (-> NaN -> 0) whenever the drawing
+      // buffer isn't reporting a size yet.
+      let fx = cx, fy = cy;
+      if (tmap.mode !== 'full') {
+        // Express the lower-screen crop as fractions of the whole canvas, then offset into it.
+        const cw = srcCanvas.width || 0, ch = srcCanvas.height || 0;
+        if (cw > 0 && ch > 0) {
+          const bot = getRegions(srcCanvas).bottom;
+          fx = (bot.sx + cx * bot.sw) / cw;
+          fy = (bot.sy + cy * bot.sh) / ch;
+        } else {
+          // Buffer size unknown — fall back to the standard stacked layout (lower half).
+          fx = cx;
+          fy = 0.5 + cy * 0.5;
+        }
       }
-      const clientX = rect.left + (sx / srcCanvas.width) * rect.width;
-      const clientY = rect.top + (sy / srcCanvas.height) * rect.height;
+      if (!Number.isFinite(fx) || !Number.isFinite(fy)) {
+        setInputDiag('mapping produced NaN — check touch mapping mode');
+        return;
+      }
+
+      const clientX = rect.left + fx * rect.width;
+      const clientY = rect.top + fy * rect.height;
+      if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) {
+        setInputDiag('bad client coords — canvas rect invalid');
+        return;
+      }
 
       // A press must land as move→down so the core samples the position before the click.
       if (kind === 'pointerdown' && !touchDown) {
@@ -978,6 +1002,7 @@
       // EmulatorJS route the event to its virtual-gamepad layer instead of the stylus,
       // so 'mouse' is the default. Selectable in diagnostics.
       const ptype = (document.getElementById('ptrType') || {}).value || 'mouse';
+      clientX = Math.round(clientX); clientY = Math.round(clientY);
       const opts = {
         clientX, clientY, screenX:clientX, screenY:clientY,
         pageX: clientX + window.scrollX, pageY: clientY + window.scrollY,
@@ -1378,14 +1403,23 @@
     // if the box is ever not exactly 4:3. Map against the *rendered picture* rather than
     // the element box, otherwise taps land offset from where the stylus should be.
     function relCoords(e) {
-      const rect = video.getBoundingClientRect();
+      // Prefer the video's rendered picture box (object-fit:contain can inset it), but fall
+      // back to the touch layer if the video hasn't reported a size yet. Dividing by a zero
+      // width here would produce NaN, and NaN coordinates end up pinned at 0,0 downstream.
+      let rect = video.getBoundingClientRect();
+      if (!rect.width || !rect.height) rect = touchLayer.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+
       const vw = video.videoWidth || 256, vh = video.videoHeight || 192;
       const scale = Math.min(rect.width / vw, rect.height / vh);
-      const dw = vw * scale, dh = vh * scale;
+      let dw = vw * scale, dh = vh * scale;
+      if (!(dw > 0) || !(dh > 0)) { dw = rect.width; dh = rect.height; }
+
       const ox = rect.left + (rect.width - dw) / 2;
       const oy = rect.top + (rect.height - dh) / 2;
       const xf = Math.min(1, Math.max(0, (e.clientX - ox) / dw));
       const yf = Math.min(1, Math.max(0, (e.clientY - oy) / dh));
+      if (!Number.isFinite(xf) || !Number.isFinite(yf)) return null;
       return { xf, yf };
     }
 
@@ -1394,22 +1428,24 @@
       e.preventDefault();
       activePointer = e.pointerId;
       try { touchLayer.setPointerCapture(e.pointerId); } catch (_) {}
-      const { xf, yf } = relCoords(e);
-      send({ type:'touch', state:'down', xf, yf });
+      const p = relCoords(e);
+      if (!p) return;
+      send({ type:'touch', state:'down', xf: p.xf, yf: p.yf });
       if (navigator.vibrate) navigator.vibrate(8);
     });
     touchLayer.addEventListener('pointermove', (e) => {
       if (e.pointerId !== activePointer) return;
       e.preventDefault();
-      const { xf, yf } = relCoords(e);
-      send({ type:'touch', state:'move', xf, yf });
+      const p = relCoords(e);
+      if (!p) return;
+      send({ type:'touch', state:'move', xf: p.xf, yf: p.yf });
     });
     function endTouch(e) {
       if (e.pointerId !== activePointer) return;
       e.preventDefault();
       activePointer = null;
-      const { xf, yf } = relCoords(e);
-      send({ type:'touch', state:'up', xf, yf });
+      const p = relCoords(e);
+      send({ type:'touch', state:'up', xf: p ? p.xf : 0.5, yf: p ? p.yf : 0.5 });
     }
     touchLayer.addEventListener('pointerup', endTouch);
     touchLayer.addEventListener('pointercancel', endTouch);
