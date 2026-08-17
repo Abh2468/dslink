@@ -8,29 +8,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* console shell palette — DS Lite polar silver over a dark room */
     --room:#101216;
-    --shell:#d3d6db;
-    --shell-hi:#eceef1;
-    --shell-lo:#a9aeb6;
-    --shell-edge:#8d939c;
-    --bezel:#1b1c1f;
-    --bezel-hi:#2a2c31;
-    --cap:#c2c6cd;         /* button plastic */
-    --cap-lo:#9aa0a9;
-    --cap-active:#7d8490;
-    --dpad:#3d4046;
-    --dpad-hi:#4c5058;
-    --ink:#41454c;
-    --blue:#3f6fe0;
-    --ok:#3ddc97;
-    --dim:#7d8391;
-    --paper:#e9ebee;
+    --shell:#d3d6db; --shell-hi:#eceef1; --shell-lo:#a9aeb6; --shell-edge:#8d939c;
+    --bezel:#1b1c1f; --bezel-hi:#2a2c31;
+    --cap:#c2c6cd; --cap-lo:#9aa0a9; --cap-active:#7d8490;
+    --dpad:#3d4046; --dpad-hi:#4c5058; --ink:#41454c;
+    --blue:#3f6fe0; --ok:#3ddc97; --dim:#7d8391; --paper:#e9ebee;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
-    margin:0; min-height:100vh; background:radial-gradient(1100px 700px at 50% -5%, #191c22 0%, var(--room) 60%);
+    margin:0; min-height:100vh;
+    background:radial-gradient(1100px 700px at 50% -5%, #191c22 0%, var(--room) 60%);
     color:var(--paper); font-family:'Inter',sans-serif;
     display:flex; flex-direction:column; align-items:center;
   }
@@ -38,475 +27,307 @@
     display:inline-flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:11px;
     padding:5px 10px; border-radius:999px; background:#171a20; border:1px solid #2c303a; color:var(--dim);
   }
-  .pill .dot{width:6px;height:6px;border-radius:50%; background:var(--dim);}
-  .pill.ok .dot{background:var(--ok);}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--dim);}
   .pill.ok{color:var(--ok); border-color:rgba(61,220,151,.3);}
+  .pill.ok .dot{background:var(--ok);}
   .btn{
-    appearance:none; border:none; border-radius:10px; padding:10px 16px; font-family:'Inter',sans-serif;
-    font-weight:600; font-size:13px; cursor:pointer; background:var(--blue); color:#fff;
+    appearance:none;border:none;border-radius:10px;padding:11px 17px;font-family:'Inter',sans-serif;
+    font-weight:600;font-size:13px;cursor:pointer;background:var(--blue);color:#fff;
   }
-  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn.ghost{background:#2c303a;color:var(--paper);}
 
-  /* ============ MODE SELECT ============ */
+  /* ---------- mode select ---------- */
   #modeSelect{
-    flex:1; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:24px; gap:26px; text-align:center;
+    flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;gap:26px;text-align:center;
   }
-  #modeSelect h1{font-family:'Space Mono',monospace; font-size:22px; margin:0;}
+  #modeSelect h1{font-family:'Space Mono',monospace;font-size:22px;margin:0;}
   #modeSelect h1 span{color:var(--blue);}
-  #modeSelect p.sub{color:var(--dim); font-size:13px; max-width:330px; line-height:1.6; margin:0;}
-  .mode-cards{display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
+  #modeSelect p.sub{color:var(--dim);font-size:13px;max-width:360px;line-height:1.6;margin:0;}
+  .mode-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
   .mode-card{
-    width:210px; background:#1b1e24; border:1px solid #2c303a; border-radius:18px; padding:24px 18px;
-    cursor:pointer; text-align:center; transition:border-color .15s, transform .15s;
+    width:220px;background:#1b1e24;border:1px solid #2c303a;border-radius:18px;padding:24px 18px;
+    cursor:pointer;text-align:center;transition:border-color .15s,transform .15s;
   }
-  .mode-card:hover{border-color:var(--blue); transform:translateY(-2px);}
-  .mode-card .icon{font-size:28px; margin-bottom:10px;}
-  .mode-card h3{font-family:'Space Mono',monospace; font-size:14px; margin:0 0 6px; color:var(--paper);}
-  .mode-card p{color:var(--dim); font-size:12px; line-height:1.5; margin:0;}
+  .mode-card:hover{border-color:var(--blue);transform:translateY(-2px);}
+  .mode-card .icon{font-size:28px;margin-bottom:10px;}
+  .mode-card h3{font-family:'Space Mono',monospace;font-size:14px;margin:0 0 6px;color:var(--paper);}
+  .mode-card p{color:var(--dim);font-size:12px;line-height:1.5;margin:0;}
 
-  /* ============ SHARED CONSOLE SHELL ============ */
+  /* ---------- shared console shell ---------- */
   .ds-shell{
-    background:linear-gradient(168deg, var(--shell-hi) 0%, var(--shell) 42%, var(--shell-lo) 100%);
+    background:linear-gradient(168deg,var(--shell-hi) 0%,var(--shell) 42%,var(--shell-lo) 100%);
     border:1px solid var(--shell-edge);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.85),
-      inset 0 -2px 6px rgba(0,0,0,.16),
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -2px 6px rgba(0,0,0,.16),
       0 26px 60px -22px rgba(0,0,0,.85);
   }
-  /* the black inset bezel that surrounds a DS screen */
   .bezel{
-    background:linear-gradient(180deg, var(--bezel-hi), var(--bezel));
-    border-radius:9px; padding:11px;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.55);
+    background:linear-gradient(180deg,var(--bezel-hi),var(--bezel));
+    border-radius:9px;padding:10px;
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.55);
   }
-  /* strict 256:192 — the real DS panel ratio, enforced on every screen */
-  .screen{
-    position:relative; width:100%; aspect-ratio:256/192; background:#000;
-    border-radius:2px; overflow:hidden;
-  }
-  .screen canvas, .screen video{
-    width:100%; height:100%; display:block; image-rendering:pixelated; object-fit:contain; background:#000;
-  }
-  .screen-hint{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-family:'Space Mono',monospace; font-size:11px; color:#6a707c; text-align:center; padding:14px;
-    pointer-events:none;
-  }
-  .power-led{
-    width:7px; height:7px; border-radius:50%; background:#5c6068;
-    box-shadow: inset 0 1px 1px rgba(0,0,0,.5);
-  }
-  .power-led.live{background:#4ea1ff; box-shadow:0 0 7px #4ea1ff;}
-  .grille{display:flex; flex-direction:column; gap:3px;}
-  .grille i{display:block; width:5px; height:5px; border-radius:50%; background:var(--shell-edge); opacity:.65;}
   .emboss{
-    font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase;
-    color:#9298a2; text-shadow:0 1px 0 rgba(255,255,255,.7);
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:#9298a2;text-shadow:0 1px 0 rgba(255,255,255,.7);
   }
+  .power-led{width:7px;height:7px;border-radius:50%;background:#5c6068;box-shadow:inset 0 1px 1px rgba(0,0,0,.5);}
+  .power-led.live{background:#4ea1ff;box-shadow:0 0 7px #4ea1ff;}
+  .grille{display:flex;flex-direction:column;gap:3px;}
+  .grille i{display:block;width:5px;height:5px;border-radius:50%;background:var(--shell-edge);opacity:.65;}
 
-  /* ============ HOST (laptop) VIEW ============ */
-  #hostView{width:100%; flex-direction:column; align-items:center;}
-  #hostView header{
-    width:100%; max-width:1000px; padding:24px 20px 6px;
-    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  /* ================= LAPTOP (display) ================= */
+  #laptopView{width:100%;flex-direction:column;align-items:center;}
+  #laptopView header{
+    width:100%;max-width:1000px;padding:24px 20px 6px;
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
   }
-  #hostView header h1{font-family:'Space Mono',monospace; font-size:19px; margin:0; color:var(--paper);}
-  #hostView header h1 span{color:var(--blue);}
-  .tag{font-family:'Space Mono',monospace; font-size:11px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;}
+  #laptopView header h1{font-family:'Space Mono',monospace;font-size:19px;margin:0;}
+  #laptopView header h1 span{color:var(--blue);}
+  .tag{font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;}
+  .laptop-wrap{width:100%;max-width:1000px;padding:0 20px 60px;display:flex;flex-direction:column;gap:18px;}
 
-  .host-wrap{width:100%; max-width:1000px; padding:0 20px 60px; display:flex; flex-direction:column; gap:18px;}
-
-  /* upper half of the DS: screen flanked by stereo speaker grilles */
-  .ds-top{
-    border-radius:16px 16px 7px 7px; padding:16px 18px 20px; max-width:620px; width:100%; margin:8px auto 0;
+  .ds-top{border-radius:16px 16px 7px 7px;padding:16px 18px 20px;max-width:660px;width:100%;margin:8px auto 0;}
+  .ds-top-inner{display:flex;align-items:center;gap:14px;}
+  .ds-top .bezel{flex:1;min-width:0;}
+  .screen{position:relative;width:100%;aspect-ratio:256/192;background:#000;border-radius:2px;overflow:hidden;}
+  .screen video{width:100%;height:100%;display:block;object-fit:contain;background:#000;}
+  .screen-hint{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:11px;color:#6a707c;text-align:center;padding:14px;
   }
-  .ds-top-inner{display:flex; align-items:center; gap:14px;}
-  .ds-top .bezel{flex:1; min-width:0;}
-  .ds-top-footer{
-    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px;
-  }
-
-  /* the hinge bar between the two halves */
+  .ds-top-footer{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
   .hinge-bar{
-    max-width:620px; width:100%; margin:0 auto; height:16px; border-radius:0 0 10px 10px;
-    background:linear-gradient(180deg, var(--shell-lo), var(--shell-edge));
+    max-width:660px;width:100%;margin:0 auto;height:16px;border-radius:0 0 10px 10px;
+    background:linear-gradient(180deg,var(--shell-lo),var(--shell-edge));
     box-shadow:inset 0 2px 4px rgba(0,0,0,.28);
-    display:flex; align-items:center; justify-content:center; gap:7px;
+    display:flex;align-items:center;justify-content:center;
   }
-  .hinge-bar .status{font-family:'Space Mono',monospace; font-size:10px; color:#3f434a; letter-spacing:.05em;}
+  .hinge-bar .status{font-family:'Space Mono',monospace;font-size:10px;color:#3f434a;letter-spacing:.05em;}
 
-  .grid{display:grid; grid-template-columns:1.05fr .95fr; gap:16px; max-width:1000px; width:100%;}
-  @media (max-width:820px){ .grid{grid-template-columns:1fr;} }
-  .card{background:#1b1e24; border:1px solid #2c303a; border-radius:16px; padding:18px;}
-  .card h2{
-    font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
-    color:var(--dim); margin:0 0 12px;
-  }
-  .field{margin-bottom:12px;}
-  .field label{display:block; font-size:12px; color:var(--dim); margin-bottom:6px;}
-  input[type=file], select{
-    width:100%; font-size:13px; color:var(--paper); background:#12151a; border:1px solid #2c303a;
-    border-radius:10px; padding:10px;
-  }
-  .qr-wrap{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .card{background:#1b1e24;border:1px solid #2c303a;border-radius:16px;padding:20px;max-width:660px;width:100%;margin:0 auto;}
+  .card h2{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:0 0 14px;}
+  .pair-wrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:center;}
   .code-display{
-    font-family:'Space Mono',monospace; font-size:36px; font-weight:700; letter-spacing:.14em;
-    color:var(--paper); background:#12151a; border:1px solid #2c303a; border-radius:14px;
-    padding:14px 20px; text-align:center; width:100%;
+    font-family:'Space Mono',monospace;font-size:40px;font-weight:700;letter-spacing:.16em;
+    color:var(--paper);background:#12151a;border:1px solid #2c303a;border-radius:14px;padding:16px 24px;text-align:center;
   }
-  .code-hint{font-size:11px; color:var(--dim); text-align:center; margin:0;}
-  #qr{background:#fff; padding:8px; border-radius:12px;}
+  #qr{background:#fff;padding:8px;border-radius:12px;line-height:0;}
+  .hintline{font-size:12px;color:var(--dim);text-align:center;margin:12px 0 0;line-height:1.6;}
   .link-box{
-    font-family:'Space Mono',monospace; font-size:11px; color:var(--dim); word-break:break-all;
-    background:#12151a; border:1px solid #2c303a; padding:8px 10px; border-radius:8px; width:100%; text-align:center;
+    font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);word-break:break-all;
+    background:#12151a;border:1px solid #2c303a;padding:8px 10px;border-radius:8px;text-align:center;margin-top:10px;
   }
-  details{margin-top:14px;}
-  summary{cursor:pointer; font-size:12px; color:var(--dim); font-family:'Space Mono',monospace;}
-  .calib-row{display:grid; grid-template-columns:70px 1fr 40px; gap:8px; align-items:center; margin:6px 0;}
-  .calib-row label{font-size:11px; color:var(--dim);}
-  .calib-row input[type=range]{width:100%;}
-  .calib-row output{font-size:11px; color:var(--paper); text-align:right;}
-  .preview{width:100%; border-radius:8px; margin-top:8px; background:#000; image-rendering:pixelated;}
 
-  /* EmulatorJS mount: sized to the DS's true 2:3 stacked-screen ratio so the core never
-     letterboxes (a mismatch here previously caused white bars + wrong aspect).
-     It must keep REAL layout geometry — the emulator resolves touch coordinates from the
-     canvas's bounding rect, and a collapsed/clipped container yields a rect that makes
-     injected taps land in the wrong place (or nowhere). So it stays fully laid out and is
-     hidden with opacity instead, pinned behind the page and non-interactive. */
-  #ejsHostOuter{
-    position:fixed; left:0; top:0; width:384px; height:576px;
-    opacity:0; pointer-events:none; z-index:-1; overflow:hidden;
+  /* ================= PHONE (runs the game) ================= */
+  #phoneView, #phoneView *{
+    -webkit-user-select:none;-moz-user-select:none;user-select:none;
+    -webkit-touch-callout:none;-webkit-user-drag:none;
   }
-  /* Debug: bring the real emulator canvas on screen so it can be clicked with a real
-     mouse. If a real click works here but the phone's taps don't, the emulator is fine
-     and the fault is in the injected events (or the messages never arriving). */
-  #ejsHostOuter.reveal{
-    opacity:1; pointer-events:auto; z-index:9999; left:16px; top:16px;
-    outline:2px solid var(--blue); background:#000;
+  #phoneView{width:100%;flex:1;display:flex;flex-direction:column;
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+  #phoneSetup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;}
+  #phoneSetup h1{font-family:'Space Mono',monospace;font-size:18px;margin:0;}
+  #phoneSetup p{color:var(--dim);font-size:13px;max-width:300px;line-height:1.6;margin:0;}
+  #phoneSetup input[type=file]{
+    width:100%;max-width:300px;background:#12151a;border:1px solid #2c303a;color:var(--paper);
+    border-radius:10px;padding:10px;font-size:13px;
   }
-  #ejsHost{width:384px; height:576px;}
-  #ejsHost #game{width:100%; height:100%;}
-
-  /* ============ CONTROLLER (phone) VIEW ============ */
-  /* Nothing in the controller should ever be selectable — dragging the stylus across the
-     touch screen or holding a button otherwise triggers text selection, the iOS callout
-     bubble, or a long-press menu, all of which interrupt play. */
-  #controllerView, #controllerView *{
-    -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
-    -webkit-touch-callout:none; -webkit-user-drag:none; user-drag:none;
-  }
-  #controllerView button, #controllerView .touch-layer, #controllerView .screen{
-    touch-action:none;
-  }
-  #controllerView video{pointer-events:none;}
-  /* ...except the code field, which must stay selectable so typing and paste work. */
-  #codeInput{-webkit-user-select:text !important; user-select:text !important; touch-action:auto;}
-  #controllerView{
-    width:100%; flex:1; display:flex; flex-direction:column; touch-action:none;
-    padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);
-  }
-  #joinScreen{
-    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:24px;
-    text-align:center;
-  }
-  #joinScreen h1{font-family:'Space Mono',monospace; font-size:18px; margin:0;}
-  #joinScreen p{color:var(--dim); font-size:13px; max-width:290px; line-height:1.6;}
   #codeInput{
-    width:100%; max-width:280px; padding:14px; border-radius:10px; border:1px solid #2c303a;
-    background:#12151a; color:var(--paper); font-family:'Space Mono',monospace; font-size:22px;
-    letter-spacing:.2em; text-align:center; text-transform:uppercase;
+    width:100%;max-width:300px;padding:14px;border-radius:10px;border:1px solid #2c303a;
+    background:#12151a;color:var(--paper);font-family:'Space Mono',monospace;font-size:22px;
+    letter-spacing:.2em;text-align:center;text-transform:uppercase;
+    -webkit-user-select:text !important;user-select:text !important;
   }
-  .topbar{display:flex; align-items:center; justify-content:space-between; padding:8px 14px;}
-  .brand{font-family:'Space Mono',monospace; font-size:13px; color:var(--paper);}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;}
+  .brand{font-family:'Space Mono',monospace;font-size:13px;}
   .brand span{color:var(--blue);}
 
-  /* lower half of the DS */
-  .ds-bottom{
-    flex:1; min-height:0; margin:0 10px 10px; border-radius:8px 8px 18px 18px;
-    padding:0 0 14px; display:flex; flex-direction:column;
-  }
-  /* L / R sit on the very top edge of the lower shell, at the outer corners */
-  .shoulder-row{
-    display:flex; justify-content:space-between; align-items:flex-start; padding:0 6px;
-    margin-top:-2px;
-  }
+  .ds-bottom{flex:1;min-height:0;margin:0 8px 8px;border-radius:8px 8px 18px 18px;padding:0 0 10px;display:flex;flex-direction:column;}
+  .shoulder-row{display:flex;justify-content:space-between;padding:0 6px;}
   .shoulder{
-    width:88px; height:26px; border:1px solid var(--shell-edge); color:#4a4e56;
-    background:linear-gradient(180deg, var(--shell-hi), var(--cap-lo));
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Space Mono',monospace; font-weight:700; font-size:11px; letter-spacing:.1em;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 1px 2px rgba(0,0,0,.2);
-    user-select:none;
+    width:84px;height:25px;border:1px solid var(--shell-edge);color:#4a4e56;
+    background:linear-gradient(180deg,var(--shell-hi),var(--cap-lo));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:11px;letter-spacing:.1em;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 2px rgba(0,0,0,.2);touch-action:none;
   }
   .shoulder.l{border-radius:9px 4px 8px 8px;}
   .shoulder.r{border-radius:4px 9px 8px 8px;}
-  .shoulder.active{background:linear-gradient(180deg, var(--cap-active), var(--cap-lo)); color:#f2f4f7;}
+  .shoulder.active{background:linear-gradient(180deg,var(--cap-active),var(--cap-lo));color:#f2f4f7;}
 
-  .deck{
-    flex:1; min-height:0; display:flex; align-items:center; justify-content:center; gap:12px;
-    padding:10px 12px 0;
+  .deck{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 10px 0;}
+
+  /* The REAL emulator canvas lives here, shifted up so only the lower DS screen shows.
+     Touches land on the actual canvas as genuine browser input — nothing is synthesised. */
+  .screen-clip{
+    position:relative;height:100%;aspect-ratio:256/192;overflow:hidden;
+    background:#000;border-radius:3px;flex:0 1 auto;
   }
-  .deck .bezel{flex:1; min-width:0; max-width:min(58vw, 340px);}
+  #ejsShift{position:absolute;left:0;width:100%;height:200%;top:-100%;}
+  #game{width:100%;height:100%;}
+  /* Hide EmulatorJS's own chrome so only the game shows through the cut-out. */
+  #game .ejs_menu_bar, #game .ejs_volume_parent, #game .ejs_menu_bar_hidden,
+  #game .ejs_virtualGamepad_parent, #game .ejs_context_menu{display:none !important;}
 
-  /* D-PAD — left side, sits slightly lower than the face buttons, as on a real DS */
-  .dpad{position:relative; width:104px; height:104px; flex:none; margin-top:26px;}
-  .dpad::before{ /* recessed well the cross sits in */
-    content:''; position:absolute; inset:-7px; border-radius:50%;
-    background:radial-gradient(circle at 50% 35%, var(--shell-lo), var(--shell-edge));
+  .dpad{position:relative;width:100px;height:100px;flex:none;margin-top:24px;}
+  .dpad::before{
+    content:'';position:absolute;inset:-7px;border-radius:50%;
+    background:radial-gradient(circle at 50% 35%,var(--shell-lo),var(--shell-edge));
     box-shadow:inset 0 2px 5px rgba(0,0,0,.3);
   }
   .dpad button{
-    position:absolute; width:35px; height:35px; padding:0; border:none;
-    background:linear-gradient(180deg, var(--dpad-hi), var(--dpad));
-    color:#cfd3d9; font-size:11px; display:flex; align-items:center; justify-content:center;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 1px 2px rgba(0,0,0,.45);
-    user-select:none;
+    position:absolute;width:34px;height:34px;padding:0;border:none;touch-action:none;
+    background:linear-gradient(180deg,var(--dpad-hi),var(--dpad));color:#cfd3d9;font-size:11px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.45);
   }
-  .dpad button.active{background:var(--ink); color:#fff;}
-  .dpad .up{top:0; left:35px; border-radius:6px 6px 0 0;}
-  .dpad .down{top:69px; left:35px; border-radius:0 0 6px 6px;}
-  .dpad .left{top:35px; left:0; border-radius:6px 0 0 6px;}
-  .dpad .right{top:35px; left:69px; border-radius:0 6px 6px 0;}
-  .dpad .center{
-    position:absolute; top:35px; left:35px; width:35px; height:35px;
-    background:linear-gradient(180deg, var(--dpad-hi), var(--dpad));
-  }
+  .dpad button.active{background:var(--ink);color:#fff;}
+  .dpad .up{top:0;left:33px;border-radius:6px 6px 0 0;}
+  .dpad .down{top:66px;left:33px;border-radius:0 0 6px 6px;}
+  .dpad .left{top:33px;left:0;border-radius:6px 0 0 6px;}
+  .dpad .right{top:33px;left:66px;border-radius:0 6px 6px 0;}
+  .dpad .center{position:absolute;top:33px;left:33px;width:34px;height:34px;
+    background:linear-gradient(180deg,var(--dpad-hi),var(--dpad));}
 
-  /* A/B/X/Y — right side, diamond, Nintendo layout: Y left, X top, A right, B bottom */
-  .faces{position:relative; width:104px; height:104px; flex:none; margin-bottom:26px;}
+  .faces{position:relative;width:100px;height:100px;flex:none;margin-bottom:24px;}
   .faces button{
-    position:absolute; width:37px; height:37px; border-radius:50%; border:1px solid var(--shell-edge);
-    background:linear-gradient(180deg, var(--shell-hi), var(--cap-lo));
-    color:#4a4e56; font-family:'Space Mono',monospace; font-weight:700; font-size:13px;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 1px 2px rgba(0,0,0,.3);
-    user-select:none;
+    position:absolute;width:36px;height:36px;border-radius:50%;border:1px solid var(--shell-edge);
+    background:linear-gradient(180deg,var(--shell-hi),var(--cap-lo));color:#4a4e56;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:13px;touch-action:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 1px 2px rgba(0,0,0,.3);
   }
-  .faces button.active{background:linear-gradient(180deg, var(--cap-active), var(--cap-lo)); color:#f2f4f7;}
-  .faces .x{top:0;    left:34px;}
-  .faces .y{top:34px; left:0;}
-  .faces .a{top:34px; left:68px;}
-  .faces .b{top:68px; left:34px;}
+  .faces button.active{background:linear-gradient(180deg,var(--cap-active),var(--cap-lo));color:#f2f4f7;}
+  .faces .x{top:0;left:32px;}
+  .faces .y{top:32px;left:0;}
+  .faces .a{top:32px;left:64px;}
+  .faces .b{top:64px;left:32px;}
 
-  /* START / SELECT — small angled ovals below the screen, toward the right, like a DS Lite */
-  .startsel{
-    display:flex; justify-content:center; gap:16px; padding:10px 12px 0;
-  }
+  .startsel{display:flex;justify-content:center;gap:14px;padding:6px 12px 0;}
   .startsel button{
-    min-width:62px; height:22px; border-radius:11px; border:1px solid var(--shell-edge);
-    background:linear-gradient(180deg, var(--shell-hi), var(--cap-lo)); color:#585d66;
-    font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.12em;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 1px 2px rgba(0,0,0,.22);
-    user-select:none;
+    min-width:60px;height:22px;border-radius:11px;border:1px solid var(--shell-edge);
+    background:linear-gradient(180deg,var(--shell-hi),var(--cap-lo));color:#585d66;
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;touch-action:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 2px rgba(0,0,0,.22);
   }
-  .startsel button.active{background:linear-gradient(180deg, var(--cap-active), var(--cap-lo)); color:#f2f4f7;}
+  .startsel button.active{background:linear-gradient(180deg,var(--cap-active),var(--cap-lo));color:#f2f4f7;}
 
-  .mic-row{display:flex; align-items:center; justify-content:center; gap:10px; padding-top:8px;}
-  .mic{width:6px; height:6px; border-radius:50%; background:var(--shell-edge); box-shadow:inset 0 1px 1px rgba(0,0,0,.45);}
+  /* screen alignment control, in case the core leaves a gap between the two screens */
+  .align-row{display:flex;align-items:center;gap:8px;justify-content:center;padding:4px 12px 0;}
+  .align-row label{font-family:'Space Mono',monospace;font-size:9px;color:#6d727b;}
+  .align-row input[type=range]{width:120px;}
+
+  #rotateHint{
+    display:none;position:fixed;inset:0;z-index:50;background:var(--room);
+    flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:30px;
+  }
+  #rotateHint .icon{font-size:44px;animation:tilt 1.6s ease-in-out infinite;}
+  #rotateHint p{color:var(--dim);font-family:'Space Mono',monospace;font-size:13px;margin:0;line-height:1.6;}
+  @keyframes tilt{0%,100%{transform:rotate(-12deg);}50%{transform:rotate(78deg);}}
+  @media (orientation:portrait){ body.playing #rotateHint{display:flex;} }
 
   @media (max-width:370px){
-    .dpad, .faces{width:88px; height:88px;}
-    .dpad button{width:30px; height:30px;}
-    .dpad .up, .dpad .down{left:29px;}
-    .dpad .down{top:58px;}
-    .dpad .left, .dpad .right{top:29px;}
-    .dpad .right{left:58px;}
-    .dpad .center{top:29px; left:29px; width:30px; height:30px;}
-    .faces button{width:32px; height:32px;}
-    .faces .x{left:28px;} .faces .y{top:28px;} .faces .a{top:28px; left:56px;} .faces .b{top:56px; left:28px;}
-    .shoulder{width:74px;}
-  }
-
-  /* ---- landscape: the intended playing orientation ---- */
-  @media (orientation:landscape){
-    #controllerView .topbar{padding:4px 12px;}
-    .ds-bottom{margin:0 6px 6px; padding-bottom:6px; border-radius:8px;}
-    .deck{padding:6px 10px 0; gap:16px;}
-    /* let the screen grow to the available height rather than being capped by width */
-    .deck .bezel{flex:0 1 auto; max-width:none; height:100%; display:flex; align-items:center; padding:8px;}
-    .deck .bezel .screen{height:100%; width:auto; aspect-ratio:256/192;}
-    .startsel{padding:4px 12px 0;}
-    .mic-row{display:none;}
-    .shoulder{height:24px;}
-  }
-
-  /* Rotate prompt — shown only while playing in portrait, since iOS Safari can't
-     force orientation and will simply ignore an orientation lock request. */
-  #rotateHint{
-    display:none; position:fixed; inset:0; z-index:50; background:var(--room);
-    flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:30px;
-  }
-  #rotateHint .icon{font-size:44px; animation:tilt 1.6s ease-in-out infinite;}
-  #rotateHint p{color:var(--dim); font-family:'Space Mono',monospace; font-size:13px; margin:0; line-height:1.6;}
-  @keyframes tilt{0%,100%{transform:rotate(-12deg);}50%{transform:rotate(78deg);}}
-  body.playing #rotateHint{display:none;}
-  @media (orientation:portrait){
-    body.playing #rotateHint{display:flex;}
+    .dpad,.faces{width:86px;height:86px;}
+    .dpad button{width:29px;height:29px;}
+    .dpad .up,.dpad .down{left:28px;} .dpad .down{top:57px;}
+    .dpad .left,.dpad .right{top:28px;} .dpad .right{left:57px;}
+    .dpad .center{top:28px;left:28px;width:29px;height:29px;}
+    .faces button{width:31px;height:31px;}
+    .faces .x{left:27px;} .faces .y{top:27px;} .faces .a{top:27px;left:54px;} .faces .b{top:54px;left:27px;}
+    .shoulder{width:70px;}
   }
 </style>
 </head>
 <body>
 
-<!-- ============ MODE SELECT ============ -->
+<!-- ================= MODE SELECT ================= -->
 <div id="modeSelect">
   <h1>ds<span>·</span>link</h1>
-  <p class="sub">Two-device Nintendo DS emulator. One device runs the game and shows the top screen, the other becomes the touch screen and controls.</p>
+  <p class="sub">
+    Two-device Nintendo DS. The phone runs the game and gives you the real touch screen and
+    controls; the laptop shows the top screen.
+  </p>
   <div class="mode-cards">
-    <div class="mode-card" data-mode="host">
+    <div class="mode-card" data-mode="laptop">
       <div class="icon">💻</div>
       <h3>Laptop</h3>
-      <p>Loads the ROM, runs the emulator, shows the top screen. You'll get a code to pair your phone.</p>
+      <p>Displays the top screen. Shows a code for your phone to connect to.</p>
     </div>
-    <div class="mode-card" data-mode="controller">
+    <div class="mode-card" data-mode="phone">
       <div class="icon">📱</div>
       <h3>Phone</h3>
-      <p>Enter the code shown on your laptop to become the touch screen and controls.</p>
-    </div>
-    <div class="mode-card" data-mode="test">
-      <div class="icon">🔧</div>
-      <h3>Touch test</h3>
-      <p>Diagnostic tool. Shows both DS screens unhidden so you can compare a real mouse click against an injected tap.</p>
+      <p>Loads the ROM and runs the game. Real touch screen and buttons, exactly like a DS.</p>
     </div>
   </div>
 </div>
 
-<!-- ============ HOST (laptop) VIEW ============ -->
-<div id="hostView" style="display:none;">
+<!-- ================= LAPTOP VIEW ================= -->
+<div id="laptopView" style="display:none;">
   <header>
-    <h1>ds<span>·</span>link <span style="color:var(--dim); font-weight:400; font-size:14px;">/ top screen</span></h1>
+    <h1>ds<span>·</span>link <span style="color:var(--dim);font-weight:400;font-size:14px;">/ top screen</span></h1>
     <span class="tag">laptop</span>
   </header>
 
-  <div class="host-wrap">
+  <div class="laptop-wrap">
     <div class="ds-top ds-shell">
       <div class="ds-top-inner">
         <div class="grille"><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="bezel">
           <div class="screen">
-            <canvas id="topCanvas" width="256" height="192"></canvas>
+            <video id="topVideo" autoplay playsinline muted></video>
+            <div class="screen-hint" id="topHint">waiting for the phone…</div>
           </div>
         </div>
         <div class="grille"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="ds-top-footer">
-        <span class="power-led" id="recDot"></span>
+        <span class="power-led" id="powerLed"></span>
         <span class="emboss">Nintendo DS · top screen</span>
       </div>
     </div>
-    <div class="hinge-bar">
-      <span class="status" id="hingeStatus">no rom loaded</span>
-    </div>
+    <div class="hinge-bar"><span class="status" id="hingeStatus">not connected</span></div>
 
-    <div class="grid">
-      <div class="card">
-        <h2>01 — Load game</h2>
-        <div class="field">
-          <label for="romInput">ROM file (.nds / .zip)</label>
-          <input type="file" id="romInput" accept=".nds,.zip">
+    <div class="card">
+      <h2>Pair your phone</h2>
+      <div class="pair-wrap">
+        <div>
+          <div class="code-display" id="codeDisplay">·····</div>
+          <div class="link-box" id="joinLink">preparing…</div>
         </div>
-        <div class="field">
-          <label for="biosInput">BIOS / firmware zip (optional — only if your game needs it)</label>
-          <input type="file" id="biosInput" accept=".zip">
-        </div>
-        <button class="btn" id="startBtn" disabled>Start emulator</button>
-        <p style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5;">
-          Use a ROM you legally own. Nothing is uploaded anywhere — the file loads directly into the emulator core running in this browser tab.
-        </p>
-
-        <details>
-          <summary>Advanced — calibrate screen split</summary>
-          <p style="font-size:11px;color:var(--dim);line-height:1.5;">
-            By default this assumes both DS screens are stacked top‑over‑bottom on one canvas (melonDS's default layout) and crops each to an exact 4:3 box from the very top and very bottom edges. Only switch to manual if your crop still looks wrong.
-          </p>
-          <div class="field">
-            <label for="calibMode">Screen layout</label>
-            <select id="calibMode">
-              <option value="auto-vertical">Auto — top over bottom (default)</option>
-              <option value="auto-horizontal">Auto — side by side</option>
-              <option value="manual">Manual (drag sliders)</option>
-            </select>
-          </div>
-          <div id="calibControls" style="display:none;"></div>
-          <canvas class="preview" id="calibPreview" width="256" height="384"></canvas>
-        </details>
+        <div id="qr"></div>
       </div>
-
-      <div class="card">
-        <h2>03 — Touch diagnostics</h2>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-bottom:10px;">
-          <input type="checkbox" id="revealEmu"> Show the real emulator canvas (click it with your mouse to test)
-        </label>
-        <button class="btn" id="testTap" style="margin-bottom:10px;">Simulate a tap at touch-screen centre</button>
-
-        <div class="field">
-          <label for="coreTouchMode">melonDS stylus mode (set before starting the game)</label>
-          <select id="coreTouchMode">
-            <option value="Joystick">Joystick — stylus driven by analog stick (most reliable here)</option>
-            <option value="Mouse">Mouse — needs real mouse events</option>
-            <option value="Touch">Touch</option>
-            <option value="">Auto (core default)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="tmapMode">Touch surface mapping</label>
-          <select id="tmapMode">
-            <option value="joystick">Analog-stick stylus (works with Joystick mode above)</option>
-            <option value="full">Whole canvas is the touch surface</option>
-            <option value="bottom">Only the lower screen area</option>
-          </select>
-        </div>
-        <div style="font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:8px;">
-          Tick "show the real emulator canvas" above, press the test tap, and watch where the
-          game's own touch marker lands. Adjust below until the marker sits exactly at the
-          centre of the lower screen. Saved automatically.
-        </div>
-        <div id="tmapControls"></div>
-        <button class="btn" id="tmapReset" style="background:#2c303a;margin-bottom:10px;">Reset calibration</button>
-        <div class="field">
-          <label for="ptrType">Injected pointer type</label>
-          <select id="ptrType">
-            <option value="mouse">mouse (default)</option>
-            <option value="touch">touch</option>
-          </select>
-        </div>
-        <pre id="diagOut" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);
-          background:#12151a;border:1px solid #2c303a;border-radius:8px;padding:10px;margin:0;
-          white-space:pre-wrap;line-height:1.5;">waiting…</pre>
-      </div>
-
-      <div class="card">
-        <h2>02 — Pair your phone</h2>
-        <div class="qr-wrap">
-          <div class="code-display" id="codeDisplay" style="font-size:14px; letter-spacing:.02em;">starting…</div>
-          <p class="code-hint">Enter this code on your phone (choose "Phone" → type the code)</p>
-          <div id="qr"></div>
-          <div class="link-box" id="joinLink">or scan this QR to skip typing</div>
-          <span class="pill" id="pairPill"><span class="dot"></span><span id="pairText">waiting for host id</span></span>
-          <div style="width:100%;font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);text-align:center;margin-top:2px;">
-            input: <span id="inputDiag">idle</span>
-          </div>
-        </div>
+      <p class="hintline">
+        On your phone, open this page, choose <b>Phone</b>, pick your ROM and enter this code.
+        Or just scan the QR to skip typing.
+      </p>
+      <div style="display:flex;justify-content:center;margin-top:12px;">
+        <span class="pill" id="pairPill"><span class="dot"></span><span id="pairText">waiting for code</span></span>
       </div>
     </div>
   </div>
-
-  <div id="ejsHostOuter"><div id="ejsHost"><div id="game"></div></div></div>
 </div>
 
-<!-- ============ CONTROLLER (phone) VIEW ============ -->
-<div id="controllerView" style="display:none;">
-  <div id="joinScreen">
-    <h1>ds·link <span style="color:var(--dim);font-weight:400;">controller</span></h1>
-    <p>Type the code shown on your laptop's "Pair your phone" panel.</p>
-    <input id="codeInput" placeholder="CODE" maxlength="8" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false">
-    <button class="btn" id="joinBtn">Connect</button>
+<!-- ================= PHONE VIEW ================= -->
+<div id="phoneView" style="display:none;">
+  <div id="phoneSetup">
+    <h1>ds·link <span style="color:var(--dim);font-weight:400;">phone</span></h1>
+    <p>This device runs the game. Pick your ROM, then enter the code from your laptop.</p>
+    <input type="file" id="romInput" accept=".nds,.zip">
+    <input type="file" id="biosInput" accept=".zip">
+    <div style="font-size:11px;color:var(--dim);max-width:300px;">
+      Second box is optional — only needed if your game requires BIOS/firmware.
+    </div>
+    <input id="codeInput" placeholder="CODE" maxlength="8" autocapitalize="characters"
+           autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="btn" id="goBtn" disabled>Start game</button>
+    <button class="btn ghost" id="soloBtn">Play without laptop</button>
+    <div id="phoneStatus" style="font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);"></div>
   </div>
 
-  <div id="playArea" style="display:none; flex:1; flex-direction:column; min-height:0;">
+  <div id="phonePlay" style="display:none;flex:1;flex-direction:column;min-height:0;">
     <div class="topbar">
       <span class="brand">ds<span>·</span>link</span>
-      <span class="pill" id="connPill"><span class="dot"></span><span id="connText">connecting…</span></span>
+      <span class="pill" id="connPill"><span class="dot"></span><span id="connText">starting…</span></span>
     </div>
 
     <div class="ds-bottom ds-shell">
@@ -524,12 +345,8 @@
           <button class="down" data-key="DOWN">▼</button>
         </div>
 
-        <div class="bezel">
-          <div class="screen">
-            <video id="video" autoplay playsinline muted></video>
-            <div class="touch-layer" id="touchLayer" style="position:absolute; inset:0;"></div>
-            <div class="screen-hint" id="screenHint">waiting for laptop screen…</div>
-          </div>
+        <div class="screen-clip" id="screenClip">
+          <div id="ejsShift"><div id="game"></div></div>
         </div>
 
         <div class="faces">
@@ -542,302 +359,267 @@
 
       <div class="startsel">
         <button data-key="SELECT">SELECT</button>
-        <button id="stylusBtn" style="min-width:84px;">STYLUS</button>
         <button data-key="START">START</button>
       </div>
-      <div class="mic-row">
-        <span class="mic"></span>
-        <span class="emboss">touch screen</span>
+      <div class="align-row">
+        <label for="alignRange">screen align</label>
+        <input type="range" id="alignRange" min="-140" max="-60" step="1" value="-100">
+        <label id="alignOut">-100%</label>
       </div>
     </div>
   </div>
 </div>
 
-<!-- shown while playing if the phone is held in portrait -->
 <div id="rotateHint">
   <div class="icon">📱</div>
   <p>Rotate your phone to landscape<br>to play</p>
 </div>
 
-<!-- ============ TOUCH TEST (diagnostic) VIEW ============ -->
-<div id="testView" style="display:none; width:100%; max-width:1000px; padding:20px;">
-  <h1 style="font-family:'Space Mono',monospace;font-size:18px;margin:0 0 4px;">
-    ds<span style="color:var(--blue);">·</span>link <span style="color:var(--dim);font-weight:400;">/ touch test</span>
-  </h1>
-  <p style="color:var(--dim);font-size:13px;margin:0 0 18px;max-width:720px;line-height:1.6;">
-    Isolates one question: do synthetic mouse events reach the DS core, and where do they land?
-    No phone, no network, no cropping — both DS screens are shown fully unhidden.
-  </p>
-
-  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
-    <div id="testGame" style="width:384px;height:576px;background:#000;border:2px solid var(--blue);border-radius:6px;"></div>
-
-    <div style="flex:1;min-width:320px;">
-      <div class="card" style="margin-bottom:12px;">
-        <b style="font-size:13px;">Step 1.</b> Load a DS ROM (plus BIOS zip if needed), then start.
-        <div style="margin-top:10px;">
-          <input type="file" id="tRom" accept=".nds,.zip" style="margin-bottom:8px;">
-          <input type="file" id="tBios" accept=".zip" style="margin-bottom:8px;">
-          <button class="btn" id="tStart" disabled>Start emulator</button>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <b style="font-size:13px;">Step 2 — real mouse.</b>
-        <span style="color:var(--dim);font-size:12px;">
-          Click the <b>lower</b> screen with your mouse. The game should respond and its touch
-          marker should appear under the cursor.
-        </span>
-      </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <b style="font-size:13px;">Step 3 — injected tap.</b>
-        <span style="color:var(--dim);font-size:12px;">
-          Move the cursor off the canvas, then inject. Watch where the marker lands versus
-          where you aimed — that difference is what the calibration sliders correct.
-        </span>
-        <div style="margin-top:10px;">
-          <button class="btn" id="tInjectCenter" disabled>Tap: lower-screen centre</button>
-          <button class="btn" id="tInjectFull" disabled>Tap: canvas centre</button>
-          <button class="btn" id="tInjectFollow" disabled>Tap: where I last clicked</button>
-        </div>
-      </div>
-
-      <pre id="tLog" style="background:#12151a;border:1px solid #2c303a;border-radius:8px;padding:12px;
-        font-family:'Space Mono',monospace;font-size:11px;line-height:1.5;color:var(--dim);
-        height:260px;overflow:auto;white-space:pre-wrap;margin:0;">ready.</pre>
-    </div>
-  </div>
-</div>
-
 <script>
 (() => {
-  // ---------- shared: PeerJS loading + ICE config ----------
+  // ---------- PeerJS loading ----------
   const PEERJS_SOURCES = [
     'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
     'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js',
   ];
-  // ---- Peer options ---------------------------------------------------------
-  // Deliberately do NOT pass a `config`/`iceServers` object. PeerJS ships a default
-  // ICE config that already includes its own STUN *and* TURN relay servers, and those
-  // are what make cross-network pairing work. Supplying a custom iceServers array
-  // REPLACES that default wholesale — which silently removes the working relays and
-  // causes "network path failed" whenever the two devices need a relay.
+  // No custom `config` here on purpose: PeerJS's defaults include working STUN *and* TURN
+  // servers. Supplying our own iceServers replaces them wholesale and breaks cross-network.
   const PEER_OPTS = { debug: 0 };
-  // Namespaced so short codes can't collide with other apps on the public broker.
   const ID_PREFIX = 'dslink-';
 
   let peerjsReady = false;
-  const readyCallbacks = [];
-  function onPeerjsReady(cb) { peerjsReady ? cb() : readyCallbacks.push(cb); }
-  function loadPeerJS(i = 0) {
+  const readyCbs = [];
+  const onPeerjsReady = (cb) => peerjsReady ? cb() : readyCbs.push(cb);
+  (function loadPeer(i = 0) {
     if (i >= PEERJS_SOURCES.length) {
       document.body.insertAdjacentHTML('afterbegin',
-        '<div style="background:#3a1c1c;color:#ffb4b4;padding:10px 16px;font:12px monospace;text-align:center;">' +
-        'Could not load the connection library — check your network/ad-blocker and reload.</div>');
+        '<div style="background:#3a1c1c;color:#ffb4b4;padding:10px;font:12px monospace;text-align:center;">' +
+        'Could not load the connection library — check network/ad-blocker and reload.</div>');
       return;
     }
     const s = document.createElement('script');
     s.src = PEERJS_SOURCES[i];
     s.onload = () => {
-      if (typeof Peer !== 'undefined') {
-        peerjsReady = true;
-        readyCallbacks.forEach(cb => cb());
-        readyCallbacks.length = 0;
-      } else loadPeerJS(i + 1);
+      if (typeof Peer !== 'undefined') { peerjsReady = true; readyCbs.forEach(f => f()); readyCbs.length = 0; }
+      else loadPeer(i + 1);
     };
-    s.onerror = () => loadPeerJS(i + 1);
+    s.onerror = () => loadPeer(i + 1);
     document.head.appendChild(s);
-  }
-  loadPeerJS();
+  })();
 
-  // ---------- mode select ----------
+  // ---------- mode routing ----------
   const modeSelect = document.getElementById('modeSelect');
-  const hostView = document.getElementById('hostView');
-  const controllerView = document.getElementById('controllerView');
-  let hostInited = false, controllerInited = false, testInited = false;
-  let fillAndConnect = () => {};
+  const laptopView = document.getElementById('laptopView');
+  const phoneView  = document.getElementById('phoneView');
+  let laptopInit = false, phoneInit = false;
 
   function chooseMode(mode, opts) {
     modeSelect.style.display = 'none';
-    if (mode === 'test') {
-      document.getElementById('testView').style.display = 'block';
-      if (!testInited) { testInited = true; initTest(); }
-      return;
-    }
-    if (mode === 'host') {
-      hostView.style.display = 'flex';
-      if (!hostInited) { hostInited = true; onPeerjsReady(initHost); }
+    if (mode === 'laptop') {
+      laptopView.style.display = 'flex';
+      if (!laptopInit) { laptopInit = true; onPeerjsReady(initLaptop); }
     } else {
-      controllerView.style.display = 'flex';
-      if (!controllerInited) { controllerInited = true; onPeerjsReady(() => initController(opts)); }
-      else if (opts && opts.autoCode) fillAndConnect(opts.autoCode);
+      phoneView.style.display = 'flex';
+      if (!phoneInit) { phoneInit = true; onPeerjsReady(() => initPhone(opts)); }
     }
   }
-  document.querySelectorAll('.mode-card').forEach(card => {
-    card.addEventListener('click', () => chooseMode(card.dataset.mode));
-  });
+  document.querySelectorAll('.mode-card').forEach(c =>
+    c.addEventListener('click', () => chooseMode(c.dataset.mode)));
 
   const qp = new URLSearchParams(location.search);
-  if (qp.get('mode') === 'controller') chooseMode('controller', { autoCode: qp.get('code') });
-  else if (qp.get('mode') === 'host') chooseMode('host');
-  else if (qp.get('mode') === 'test') chooseMode('test');
+  if (qp.get('mode') === 'phone') chooseMode('phone', { autoCode: qp.get('code') });
+  else if (qp.get('mode') === 'laptop') chooseMode('laptop');
 
-  // ============================================================
-  // HOST (laptop)
-  // ============================================================
-  function initHost() {
-    // EmulatorJS analog axis indices (from its default control map):
-    // 16/17 = left stick X +/-, 18/19 = left stick Y +/-, 20/21 = right stick X +/-,
-    // 22/23 = right stick Y +/-. melonDS's Joystick stylus mode reads the right stick.
-    const AXIS = { RX_POS:20, RX_NEG:21, RY_POS:22, RY_NEG:23 };
-    const STYLUS_BTN = 14; // L3 — the tap/hold press in joystick stylus mode
-
-    // libretro joypad indices, which is what EmulatorJS's simulateInput() expects.
-    // (EmulatorJS default control map: 0=x/B, 1=s/Y, 2=v/SELECT, 3=enter/START,
-    //  4-7=dpad, 8=z/A, 9=a/X, 10=q/L, 11=e/R)
-    const BTN_INDEX = {
-      B:0, Y:1, SELECT:2, START:3, UP:4, DOWN:5, LEFT:6, RIGHT:7, A:8, X:9, L:10, R:11,
-    };
-
-    // Fallback only. These are EmulatorJS's *actual* default keys — note A is 'z' and
-    // B is 'x' (an earlier version of this file had the four face buttons swapped).
-    const KEY_MAP = {
-      A:      { key:'z',       code:'KeyZ',      keyCode:90 },
-      B:      { key:'x',       code:'KeyX',      keyCode:88 },
-      X:      { key:'a',       code:'KeyA',      keyCode:65 },
-      Y:      { key:'s',       code:'KeyS',      keyCode:83 },
-      L:      { key:'q',       code:'KeyQ',      keyCode:81 },
-      R:      { key:'e',       code:'KeyE',      keyCode:69 },
-      START:  { key:'Enter',   code:'Enter',     keyCode:13 },
-      SELECT: { key:'v',       code:'KeyV',      keyCode:86 },
-      UP:     { key:'ArrowUp',    code:'ArrowUp',    keyCode:38 },
-      DOWN:   { key:'ArrowDown',  code:'ArrowDown',  keyCode:40 },
-      LEFT:   { key:'ArrowLeft',  code:'ArrowLeft',  keyCode:37 },
-      RIGHT:  { key:'ArrowRight', code:'ArrowRight', keyCode:39 },
-    };
-
-    const LS_KEY = 'ds-link-calibration-v2';
-    let calib = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {
-      mode:'auto-vertical', top:{x:0,y:0,w:100,h:50}, bottom:{x:0,y:50,w:100,h:50},
-    };
-    if (!calib.mode) calib.mode = 'auto-vertical';
-
-    const romInput = document.getElementById('romInput');
-    const biosInput = document.getElementById('biosInput');
-    const startBtn = document.getElementById('startBtn');
-    const hingeStatus = document.getElementById('hingeStatus');
-    const recDot = document.getElementById('recDot');
-    const topCanvas = document.getElementById('topCanvas');
-    const topCtx = topCanvas.getContext('2d', { alpha:false, desynchronized:true });
-    const calibPreview = document.getElementById('calibPreview');
-    const calibPCtx = calibPreview.getContext('2d', { alpha:false });
-    const calibControls = document.getElementById('calibControls');
-    const calibModeSel = document.getElementById('calibMode');
-    const pairPill = document.getElementById('pairPill');
-    const pairText = document.getElementById('pairText');
+  // =========================================================
+  // LAPTOP — passive display for the top screen
+  // =========================================================
+  function initLaptop() {
     const codeDisplay = document.getElementById('codeDisplay');
-    const joinLink = document.getElementById('joinLink');
+    const joinLink    = document.getElementById('joinLink');
+    const pairPill    = document.getElementById('pairPill');
+    const pairText    = document.getElementById('pairText');
+    const hingeStatus = document.getElementById('hingeStatus');
+    const powerLed    = document.getElementById('powerLed');
+    const topVideo    = document.getElementById('topVideo');
+    const topHint     = document.getElementById('topHint');
 
-    calibModeSel.value = calib.mode;
-    calibModeSel.addEventListener('change', () => {
-      calib.mode = calibModeSel.value;
-      calibControls.style.display = calib.mode === 'manual' ? 'block' : 'none';
-      localStorage.setItem(LS_KEY, JSON.stringify(calib));
-    });
-    calibControls.style.display = calib.mode === 'manual' ? 'block' : 'none';
+    const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
+    const genCode = (n = 5) =>
+      Array.from({length:n}, () => CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
+
+    let peer = null, openTimer = null;
+
+    const setCode = (txt, small) => {
+      codeDisplay.style.fontSize = small ? '15px' : '';
+      codeDisplay.style.letterSpacing = small ? '.02em' : '';
+      codeDisplay.textContent = txt;
+    };
+
+    function showCode(id) {
+      const code = id.startsWith(ID_PREFIX) ? id.slice(ID_PREFIX.length) : id;
+      setCode(code);
+      const url = new URL(window.location.pathname, window.location.href);
+      url.searchParams.set('mode', 'phone');
+      url.searchParams.set('code', code);
+      joinLink.textContent = url.toString();
+      const qr = document.getElementById('qr');
+      qr.innerHTML = '<img width="150" height="150" alt="Scan to join" src="' +
+        'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=8&data=' +
+        encodeURIComponent(url.toString()) + '">';
+      qr.querySelector('img').addEventListener('error', () => {
+        qr.innerHTML = '<div style="width:150px;height:150px;display:flex;align-items:center;' +
+          'justify-content:center;font:11px monospace;color:#333;padding:10px;text-align:center;">' +
+          'QR unavailable — type the code</div>';
+      }, { once:true });
+      pairText.textContent = 'waiting for phone';
+    }
+
+    function start(attempt = 0) {
+      clearTimeout(openTimer);
+      if (peer) { try { peer.destroy(); } catch(_){} peer = null; }
+      if (attempt > 8) { setCode('no free code — reload', true); return; }
+
+      setCode('generating…', true);
+      peer = new Peer(ID_PREFIX + genCode(), PEER_OPTS);
+      const mine = peer;
+
+      openTimer = setTimeout(() => {
+        if (mine !== peer || mine.open) return;
+        setCode('cannot reach server', true);
+        joinLink.textContent = 'signaling server unreachable — check network/ad-blocker, then reload';
+      }, 12000);
+
+      peer.on('open', (id) => { clearTimeout(openTimer); showCode(id); });
+      peer.on('disconnected', () => { if (mine === peer) { try { peer.reconnect(); } catch(_){} } });
+      peer.on('error', (err) => {
+        console.error('PeerJS error:', err);
+        if (mine !== peer) return;
+        const t = err && err.type ? err.type : 'unknown';
+        if (t === 'unavailable-id' || t === 'invalid-id') { start(attempt + 1); return; }
+        clearTimeout(openTimer);
+        setCode('connection error', true);
+        joinLink.textContent = 'error (' + t + ') — retrying…';
+        setTimeout(() => start(attempt + 1), 1500);
+      });
+
+      // The phone calls us with the top-screen stream.
+      peer.on('call', (call) => {
+        pairText.textContent = 'phone connecting…';
+        call.answer();
+        call.on('stream', (stream) => {
+          topVideo.srcObject = stream;
+          topHint.style.display = 'none';
+          powerLed.classList.add('live');
+          pairPill.classList.add('ok');
+          pairText.textContent = 'phone connected';
+          hingeStatus.textContent = 'receiving top screen';
+        });
+        call.on('close', () => {
+          powerLed.classList.remove('live');
+          pairPill.classList.remove('ok');
+          pairText.textContent = 'phone disconnected';
+          hingeStatus.textContent = 'not connected';
+          topHint.style.display = 'flex';
+        });
+        const pc = call.peerConnection;
+        if (pc) pc.addEventListener('iceconnectionstatechange', () => {
+          const st = pc.iceConnectionState;
+          console.log('ICE:', st);
+          if (st === 'failed') { pairPill.classList.remove('ok'); pairText.textContent = 'network path failed'; }
+        });
+      });
+
+      peer.on('connection', (conn) => {
+        conn.on('data', (msg) => {
+          try {
+            const m = typeof msg === 'string' ? JSON.parse(msg) : msg;
+            if (m.type === 'status') hingeStatus.textContent = m.text;
+          } catch(_){}
+        });
+      });
+    }
+    start();
+  }
+
+  // =========================================================
+  // PHONE — runs the emulator; touch is REAL input on the canvas
+  // =========================================================
+  function initPhone(opts) {
+    const romInput   = document.getElementById('romInput');
+    const biosInput  = document.getElementById('biosInput');
+    const codeInput  = document.getElementById('codeInput');
+    const goBtn      = document.getElementById('goBtn');
+    const soloBtn    = document.getElementById('soloBtn');
+    const phoneSetup = document.getElementById('phoneSetup');
+    const phonePlay  = document.getElementById('phonePlay');
+    const phoneStatus= document.getElementById('phoneStatus');
+    const connPill   = document.getElementById('connPill');
+    const connText   = document.getElementById('connText');
+    const alignRange = document.getElementById('alignRange');
+    const alignOut   = document.getElementById('alignOut');
+    const ejsShift   = document.getElementById('ejsShift');
+
+    // libretro joypad indices used by EmulatorJS's simulateInput()
+    const BTN_INDEX = { B:0, Y:1, SELECT:2, START:3, UP:4, DOWN:5, LEFT:6, RIGHT:7, A:8, X:9, L:10, R:11 };
 
     let romURL = null, biosURL = null;
-    const BOTTOM_FPS = 20; // phone screen refresh — lower = less load on the emulator
-    let srcCanvas = null, bottomCanvas = null, bottomCtx = null, bottomStream = null, gameStarted = false;
+    let peer = null, conn = null, call = null;
+    let srcCanvas = null, topCanvas = null, topCtx = null, topStream = null;
+    const TOP_FPS = 20;
 
+    if (opts && opts.autoCode) codeInput.value = String(opts.autoCode).toUpperCase();
+
+    const refreshGo = () => { goBtn.disabled = !(romURL && codeInput.value.trim()); };
     romInput.addEventListener('change', () => {
-      if (romInput.files[0]) { romURL = URL.createObjectURL(romInput.files[0]); startBtn.disabled = false; }
+      if (romInput.files[0]) { romURL = URL.createObjectURL(romInput.files[0]); refreshGo(); }
     });
     biosInput.addEventListener('change', () => {
       if (biosInput.files[0]) biosURL = URL.createObjectURL(biosInput.files[0]);
     });
-
-    function buildCalibRow(screenKey, axis, label) {
-      const row = document.createElement('div');
-      row.className = 'calib-row';
-      const id = `calib_${screenKey}_${axis}`;
-      row.innerHTML = `<label for="${id}">${label}</label>
-        <input type="range" id="${id}" min="0" max="100" value="${calib[screenKey][axis]}">
-        <output>${calib[screenKey][axis]}%</output>`;
-      calibControls.appendChild(row);
-      row.querySelector('input').addEventListener('input', (e) => {
-        calib[screenKey][axis] = Number(e.target.value);
-        row.querySelector('output').textContent = e.target.value + '%';
-        localStorage.setItem(LS_KEY, JSON.stringify(calib));
-      });
-    }
-    ['top','bottom'].forEach(s => {
-      const h = document.createElement('div');
-      h.style.cssText = 'font-family:Space Mono,monospace;font-size:11px;color:#7d8391;margin-top:10px;';
-      h.textContent = s === 'top' ? 'Top screen box' : 'Bottom screen box';
-      calibControls.appendChild(h);
-      ['x','y','w','h'].forEach(a => buildCalibRow(s, a, a.toUpperCase()));
+    codeInput.addEventListener('input', () => {
+      codeInput.value = codeInput.value.toUpperCase();
+      refreshGo();
     });
 
-    // Copying pixels out of the emulator's WebGL canvas forces a GPU->CPU readback, which
-    // is expensive. This preview used to redraw every single frame even while its <details>
-    // panel was collapsed and invisible — pure waste that slowed the emulator down. It now
-    // only runs while the panel is open, and at a low frame rate.
-    const calibDetails = calibPreview.closest('details');
-    function drawCalibPreview() {
-      if (calibDetails && calibDetails.open) {
-        calibPCtx.fillStyle = '#000';
-        calibPCtx.fillRect(0, 0, calibPreview.width, calibPreview.height);
-        if (srcCanvas && srcCanvas.width) {
-          calibPCtx.drawImage(srcCanvas, 0, 0, calibPreview.width, calibPreview.height);
-          const r = getRegions(srcCanvas);
-          const kx = calibPreview.width / srcCanvas.width, ky = calibPreview.height / srcCanvas.height;
-          drawBox({x:r.top.sx*kx, y:r.top.sy*ky, w:r.top.sw*kx, h:r.top.sh*ky}, '#4c7cff', 'TOP');
-          drawBox({x:r.bottom.sx*kx, y:r.bottom.sy*ky, w:r.bottom.sw*kx, h:r.bottom.sh*ky}, '#ff6b57', 'BOTTOM');
-        }
-      }
-      setTimeout(drawCalibPreview, 120);
-    }
-    function drawBox(r, color, label) {
-      calibPCtx.strokeStyle = color; calibPCtx.lineWidth = 2;
-      calibPCtx.strokeRect(r.x, r.y, r.w, r.h);
-      calibPCtx.fillStyle = color; calibPCtx.font = '10px monospace';
-      calibPCtx.fillText(label, r.x + 4, r.y + 12);
-    }
-    drawCalibPreview();
+    // Screen alignment: shifts the emulator up inside the cut-out so only the lower DS
+    // screen shows. -100% is exactly half of a 2:3 stacked canvas; adjust if the core
+    // leaves a gap between the screens.
+    const savedAlign = localStorage.getItem('ds-link-align');
+    if (savedAlign) { alignRange.value = savedAlign; }
+    const applyAlign = () => {
+      ejsShift.style.top = alignRange.value + '%';
+      alignOut.textContent = alignRange.value + '%';
+      localStorage.setItem('ds-link-align', alignRange.value);
+    };
+    alignRange.addEventListener('input', applyAlign);
+    applyAlign();
 
-    // Pixel-space crop boxes. Auto modes derive an exact 4:3 box anchored to each edge,
-    // so both screens keep the true 256:192 ratio even if the core leaves a gap between them.
-    function getRegions(canvas) {
-      if (calib.mode === 'auto-horizontal') {
-        const h = canvas.height, screenW = Math.round(h * (256/192));
-        return {
-          top:    { sx:0, sy:0, sw:screenW, sh:h },
-          bottom: { sx:Math.max(0, canvas.width - screenW), sy:0, sw:screenW, sh:h },
-        };
-      }
-      if (calib.mode === 'manual') {
-        const pct = (r) => ({
-          sx: r.x/100*canvas.width, sy: r.y/100*canvas.height,
-          sw: r.w/100*canvas.width, sh: r.h/100*canvas.height,
-        });
-        return { top: pct(calib.top), bottom: pct(calib.bottom) };
-      }
-      const w = canvas.width, screenH = Math.round(w * (192/256));
-      return {
-        top:    { sx:0, sy:0, sw:w, sh:screenH },
-        bottom: { sx:0, sy:Math.max(0, canvas.height - screenH), sw:w, sh:screenH },
-      };
+    goBtn.addEventListener('click', () => startEverything(codeInput.value.trim().toUpperCase()));
+    soloBtn.addEventListener('click', () => startEverything(null));
+
+    async function enterImmersive() {
+      const el = document.documentElement;
+      try {
+        if (el.requestFullscreen) await el.requestFullscreen({ navigationUI:'hide' });
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } catch(_){}
+      try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch(_){}
     }
 
-    startBtn.addEventListener('click', () => {
-      if (gameStarted) return;
-      gameStarted = true;
-      startBtn.disabled = true;
-      hingeStatus.textContent = 'loading core…';
+    function startEverything(code) {
+      if (!romURL) { phoneStatus.textContent = 'pick a ROM first'; return; }
+      goBtn.disabled = true; soloBtn.disabled = true;
+      document.body.classList.add('playing');
+      enterImmersive();
+      phoneSetup.style.display = 'none';
+      phonePlay.style.display = 'flex';
+      connText.textContent = code ? 'loading core…' : 'solo mode';
+      launchEmulator();
+      if (code) connectToLaptop(code);
+    }
 
+    function launchEmulator() {
       window.EJS_player = '#game';
       window.EJS_core = 'nds';
       window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
@@ -845,815 +627,100 @@
       if (biosURL) window.EJS_biosUrl = biosURL;
       window.EJS_startOnLoaded = true;
       window.EJS_backgroundColor = '#000';
-      // Threaded cores are dramatically faster for DS, but need SharedArrayBuffer, which
-      // only exists when the page is served cross-origin isolated (COOP+COEP headers).
-      // See the header config files shipped alongside this page.
+      // No virtual gamepad: our own DS-style buttons drive the core directly.
+      window.EJS_VirtualGamepadSettings = [];
       if (self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined') {
         window.EJS_threads = true;
       }
-      window.EJS_VirtualGamepadSettings = [];
-      // melonDS reads the stylus from the analog stick in Joystick mode, which we can drive
-      // through simulateInput — the same path the buttons already use successfully.
-      const coreTouch = document.getElementById('coreTouchMode').value;
-      if (coreTouch) window.EJS_defaultOptions = { melonds_touch_mode: coreTouch };
-      window.EJS_onGameStart = () => {
-        hingeStatus.textContent = 'game running — locating screen…';
-        findCanvasAndBoot();
-      };
+      window.EJS_onGameStart = () => { connText.textContent = 'running'; findCanvas(); };
       const s = document.createElement('script');
       s.src = window.EJS_pathtodata + 'loader.js';
       document.body.appendChild(s);
-    });
+    }
 
-    function findCanvasAndBoot(tries = 0) {
-      const canvases = [...document.querySelectorAll('#game canvas')]
+    function findCanvas(tries = 0) {
+      const list = [...document.querySelectorAll('#game canvas')]
         .sort((a,b) => (b.width*b.height) - (a.width*a.height));
-      srcCanvas = canvases[0];
+      srcCanvas = list[0];
       if (!srcCanvas || !srcCanvas.width) {
-        if (tries < 50) return setTimeout(() => findCanvasAndBoot(tries+1), 200);
-        hingeStatus.textContent = 'could not find render canvas';
+        if (tries < 60) return setTimeout(() => findCanvas(tries+1), 200);
+        connText.textContent = 'canvas not found';
         return;
       }
-      bottomCanvas = document.createElement('canvas');
-      bottomCanvas.width = 256; bottomCanvas.height = 192;
-      bottomCtx = bottomCanvas.getContext('2d', { alpha:false, desynchronized:true });
-      bottomStream = bottomCanvas.captureStream(BOTTOM_FPS);
-      hingeStatus.textContent = 'running — waiting for phone';
-      requestAnimationFrame(renderLoop);
-      maybeCallController();
+      topCanvas = document.createElement('canvas');
+      topCanvas.width = 256; topCanvas.height = 192;
+      topCtx = topCanvas.getContext('2d', { alpha:false, desynchronized:true });
+      topStream = topCanvas.captureStream(TOP_FPS);
+      requestAnimationFrame(topLoop);
+      maybeCall();
     }
 
-    // Each drawImage from the emulator's WebGL canvas is a GPU->CPU readback. Two of them
-    // per frame is what made emulation stutter, so the bottom screen (which only feeds the
-    // phone's video stream) is refreshed at a capped rate instead of every frame.
-    let lastBottomDraw = 0;
-    let fpsFrames = 0, fpsLast = performance.now(), measuredFps = 0;
-    function renderLoop(now) {
-      fpsFrames++;
-      if (now - fpsLast >= 1000) { measuredFps = fpsFrames; fpsFrames = 0; fpsLast = now; }
-      if (srcCanvas && srcCanvas.width) {
-        const r = getRegions(srcCanvas);
-        topCtx.drawImage(srcCanvas, r.top.sx, r.top.sy, r.top.sw, r.top.sh, 0, 0, topCanvas.width, topCanvas.height);
-        // No phone attached => nobody is watching the bottom screen, so skip the copy
-        // entirely rather than paying for a GPU readback every frame for nothing.
-        if (bottomCtx && controllerPeerId && (now - lastBottomDraw) >= (1000 / BOTTOM_FPS)) {
-          lastBottomDraw = now;
-          bottomCtx.drawImage(srcCanvas, r.bottom.sx, r.bottom.sy, r.bottom.sw, r.bottom.sh, 0, 0, bottomCanvas.width, bottomCanvas.height);
-        }
+    // Copy just the upper screen into a small canvas and stream that to the laptop.
+    let lastDraw = 0;
+    function topLoop(now) {
+      if (srcCanvas && srcCanvas.width && topCtx && call &&
+          (now - lastDraw) >= (1000 / TOP_FPS)) {
+        lastDraw = now;
+        const w = srcCanvas.width;
+        const h = Math.round(w * (192/256)); // exact 4:3 slice off the top edge
+        topCtx.drawImage(srcCanvas, 0, 0, w, h, 0, 0, topCanvas.width, topCanvas.height);
       }
-      requestAnimationFrame(renderLoop);
+      requestAnimationFrame(topLoop);
     }
 
-    function sendKey(type, mapEntry) {
-      if (!mapEntry) return;
-      const ev = new KeyboardEvent(type, {
-        key: mapEntry.key, code: mapEntry.code, keyCode: mapEntry.keyCode,
-        which: mapEntry.keyCode, bubbles: true, cancelable: true,
+    function connectToLaptop(code) {
+      peer = new Peer(null, PEER_OPTS);
+      peer.on('error', (err) => {
+        console.error('PeerJS error:', err);
+        connText.textContent = 'connection error (' + (err && err.type ? err.type : '?') + ')';
+        connPill.classList.remove('ok');
       });
-      window.dispatchEvent(ev);
-      document.dispatchEvent(ev);
-      if (srcCanvas) srcCanvas.dispatchEvent(ev);
+      const go = () => {
+        conn = peer.connect(ID_PREFIX + code, { reliable:true });
+        conn.on('open', () => { connPill.classList.add('ok'); connText.textContent = 'linked'; maybeCall(); });
+        conn.on('close', () => { connPill.classList.remove('ok'); connText.textContent = 'laptop disconnected'; });
+        conn.on('error', (e) => { console.error(e); connText.textContent = 'link failed — check code'; });
+      };
+      if (peer.open) go(); else peer.on('open', go);
     }
 
-    function gameManager() {
+    // Send the top-screen stream once both the emulator and the link are ready.
+    function maybeCall() {
+      if (call || !peer || !topStream || !conn || !conn.open) return;
+      try {
+        call = peer.call(ID_PREFIX + codeInput.value.trim().toUpperCase(), topStream);
+        connText.textContent = 'streaming top screen';
+      } catch (e) { console.error('call failed', e); }
+    }
+
+    // ---------- buttons: drive the core directly, no relay ----------
+    function gm() {
       const em = window.EJS_emulator;
       return em && em.gameManager ? em.gameManager : null;
     }
-
-    // Prefer EmulatorJS's own input API — synthetic KeyboardEvents are unreliable because
-    // the core reads its own input state rather than listening for DOM key events.
-    function pressButton(key, down) {
-      const gm = gameManager();
-      const idx = BTN_INDEX[key];
-      if (gm && typeof gm.simulateInput === 'function' && idx !== undefined) {
-        try {
-          gm.simulateInput(0, idx, down ? 1 : 0);
-          setInputDiag('api: ' + key + (down ? '↓' : '↑'));
-          return;
-        } catch (e) { console.warn('simulateInput failed:', e); }
-      }
-      sendKey(down ? 'keydown' : 'keyup', KEY_MAP[key]);
-      setInputDiag('key: ' + key + (down ? '↓' : '↑') + (gm ? '' : ' (no gameManager)'));
+    function press(key, down) {
+      const g = gm(), idx = BTN_INDEX[key];
+      if (!g || typeof g.simulateInput !== 'function' || idx === undefined) return;
+      try { g.simulateInput(0, idx, down ? 1 : 0); } catch (e) { console.warn(e); }
     }
-
-    // Drive the right analog stick from the phone's finger movement. Values are magnitudes
-    // 0..1 on the positive/negative index of each axis, matching how EmulatorJS reports
-    // real gamepad axes.
-    function setStick(x, y) {
-      const gm = gameManager();
-      if (!gm || typeof gm.simulateInput !== 'function') return;
-      const clamp = (v) => Math.min(1, Math.max(-1, Number.isFinite(v) ? v : 0));
-      x = clamp(x); y = clamp(y);
-      try {
-        gm.simulateInput(0, AXIS.RX_POS, x > 0 ?  x : 0);
-        gm.simulateInput(0, AXIS.RX_NEG, x < 0 ? -x : 0);
-        gm.simulateInput(0, AXIS.RY_POS, y > 0 ?  y : 0);
-        gm.simulateInput(0, AXIS.RY_NEG, y < 0 ? -y : 0);
-        setInputDiag('stick ' + x.toFixed(2) + ',' + y.toFixed(2));
-      } catch (e) { console.warn('setStick failed', e); }
-    }
-    function setStylusPressed(down) {
-      const gm = gameManager();
-      if (!gm || typeof gm.simulateInput !== 'function') return;
-      try {
-        gm.simulateInput(0, STYLUS_BTN, down ? 1 : 0);
-        setInputDiag('stylus ' + (down ? 'press' : 'release'));
-      } catch (e) { console.warn('stylus press failed', e); }
-    }
-
-    let diagTimer = null;
-    function setInputDiag(text) {
-      const el = document.getElementById('inputDiag');
-      if (!el) return;
-      el.textContent = text;
-      clearTimeout(diagTimer);
-      diagTimer = setTimeout(() => { el.textContent = 'idle'; }, 1500);
-    }
-
-    // Map a normalized point on the phone's touch screen (0..1) onto the emulator canvas.
-    // xf/yf already refer to the bottom screen only, so they map into the bottom crop box.
-    let touchDown = false;
-    let lastInject = null, lastTouchMsg = null, touchMsgCount = 0;
-
-    // How a normalized point on the phone's touch screen maps onto the emulator canvas.
-    // 'bottom' assumes the core only treats the lower screen area as the touch surface.
-    // 'full' assumes the core stretches the whole canvas onto the touch screen — which is
-    // what melonDS/RetroArch actually does in some layouts, and produces a marker that
-    // lands low and right of where you aimed if you assumed 'bottom'.
-    const TMAP_KEY = 'ds-link-touchmap-v1';
-    let tmap = JSON.parse(localStorage.getItem(TMAP_KEY) || 'null') ||
-               { mode:'joystick', offX:0, offY:0, scaleX:1, scaleY:1 };
-    const saveTmap = () => localStorage.setItem(TMAP_KEY, JSON.stringify(tmap));
-    function sendTouch(kind, xf, yf) {
-      if (!srcCanvas) return;
-      const rect = srcCanvas.getBoundingClientRect();
-      if (!rect.width || !rect.height) return; // canvas not laid out yet
-
-      // Guard the inputs. If a message ever arrives without usable numbers, bailing out is
-      // essential: clientX/clientY in MouseEventInit are `long`, so a NaN silently becomes
-      // 0 and every tap lands in the top-left corner instead of failing visibly.
-      if (!Number.isFinite(xf) || !Number.isFinite(yf)) {
-        setInputDiag('bad touch coords: ' + xf + ',' + yf);
-        return;
-      }
-
-      // Apply calibration in normalized space.
-      let cx = 0.5 + (xf - 0.5) * tmap.scaleX + tmap.offX;
-      let cy = 0.5 + (yf - 0.5) * tmap.scaleY + tmap.offY;
-      cx = Math.min(1, Math.max(0, cx));
-      cy = Math.min(1, Math.max(0, cy));
-
-      // Work entirely in the canvas's on-screen rect. The old version scaled through
-      // srcCanvas.width/height, which divides by zero (-> NaN -> 0) whenever the drawing
-      // buffer isn't reporting a size yet.
-      let fx = cx, fy = cy;
-      if (tmap.mode !== 'full') {
-        // Express the lower-screen crop as fractions of the whole canvas, then offset into it.
-        const cw = srcCanvas.width || 0, ch = srcCanvas.height || 0;
-        if (cw > 0 && ch > 0) {
-          const bot = getRegions(srcCanvas).bottom;
-          fx = (bot.sx + cx * bot.sw) / cw;
-          fy = (bot.sy + cy * bot.sh) / ch;
-        } else {
-          // Buffer size unknown — fall back to the standard stacked layout (lower half).
-          fx = cx;
-          fy = 0.5 + cy * 0.5;
-        }
-      }
-      if (!Number.isFinite(fx) || !Number.isFinite(fy)) {
-        setInputDiag('mapping produced NaN — check touch mapping mode');
-        return;
-      }
-
-      const clientX = rect.left + fx * rect.width;
-      const clientY = rect.top + fy * rect.height;
-      if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) {
-        setInputDiag('bad client coords — canvas rect invalid');
-        return;
-      }
-
-      // A press must land as move→down so the core samples the position before the click.
-      if (kind === 'pointerdown' && !touchDown) {
-        dispatchAt('pointermove', 'mousemove', clientX, clientY, 0);
-        touchDown = true;
-      }
-      if (kind === 'pointerup') touchDown = false;
-
-      const buttons = kind === 'pointerup' ? 0 : 1;
-      const mouseType = kind === 'pointerdown' ? 'mousedown' : kind === 'pointerup' ? 'mouseup' : 'mousemove';
-      dispatchAt(kind, mouseType, clientX, clientY, buttons);
-    }
-    function dispatchAt(pointerType, mouseType, clientX, clientY, buttons) {
-      // RetroArch/Emscripten reads the *mouse*; sending pointerType 'touch' can make
-      // EmulatorJS route the event to its virtual-gamepad layer instead of the stylus,
-      // so 'mouse' is the default. Selectable in diagnostics.
-      const ptype = (document.getElementById('ptrType') || {}).value || 'mouse';
-      clientX = Math.round(clientX); clientY = Math.round(clientY);
-      const opts = {
-        clientX, clientY, screenX:clientX, screenY:clientY,
-        pageX: clientX + window.scrollX, pageY: clientY + window.scrollY,
-        bubbles:true, cancelable:true, composed:true, view:window, detail:1,
-        pointerId:1, pointerType:ptype, isPrimary:true, button:0, buttons,
-      };
-      lastInject = { x: Math.round(clientX), y: Math.round(clientY), type: mouseType, ptype };
-
-      // Emscripten registers listeners on the canvas, but also on document/window
-      // depending on build flags — dispatch to the canvas and let it bubble, then also
-      // fire directly at document for the handlers that listen there.
-      try { srcCanvas.dispatchEvent(new PointerEvent(pointerType, opts)); } catch (_) {}
-      try { srcCanvas.dispatchEvent(new MouseEvent(mouseType, opts)); } catch (_) {}
-      if (mouseType === 'mousemove' || mouseType === 'mouseup') {
-        try { document.dispatchEvent(new MouseEvent(mouseType, opts)); } catch (_) {}
-      }
-
-      // Mirror as a TouchEvent as well, for builds that bind touch handlers.
-      const touchType = mouseType === 'mousedown' ? 'touchstart'
-                      : mouseType === 'mouseup'   ? 'touchend' : 'touchmove';
-      try {
-        const touch = new Touch({
-          identifier: 1, target: srcCanvas,
-          clientX, clientY, screenX: clientX, screenY: clientY,
-          pageX: clientX + window.scrollX, pageY: clientY + window.scrollY,
-          radiusX: 1, radiusY: 1, force: 1,
-        });
-        const list = touchType === 'touchend' ? [] : [touch];
-        srcCanvas.dispatchEvent(new TouchEvent(touchType, {
-          bubbles: true, cancelable: true, view: window,
-          touches: list, targetTouches: list, changedTouches: [touch],
-        }));
-      } catch (_) { /* TouchEvent not constructible here */ }
-    }
-
-    // ---------- touch mapping calibration ----------
-    const tmapModeSel = document.getElementById('tmapMode');
-    tmapModeSel.value = tmap.mode;
-    tmapModeSel.addEventListener('change', () => { tmap.mode = tmapModeSel.value; saveTmap(); });
-
-    const tmapControls = document.getElementById('tmapControls');
-    const TMAP_FIELDS = [
-      { key:'offX',   label:'X shift', min:-0.5, max:0.5, step:0.005 },
-      { key:'offY',   label:'Y shift', min:-0.5, max:0.5, step:0.005 },
-      { key:'scaleX', label:'X scale', min:0.25, max:2,   step:0.01  },
-      { key:'scaleY', label:'Y scale', min:0.25, max:2,   step:0.01  },
-    ];
-    TMAP_FIELDS.forEach(f => {
-      const row = document.createElement('div');
-      row.className = 'calib-row';
-      row.innerHTML = `<label>${f.label}</label>
-        <input type="range" min="${f.min}" max="${f.max}" step="${f.step}" value="${tmap[f.key]}">
-        <output>${Number(tmap[f.key]).toFixed(2)}</output>`;
-      tmapControls.appendChild(row);
-      const input = row.querySelector('input'), out = row.querySelector('output');
-      input.addEventListener('input', () => {
-        tmap[f.key] = Number(input.value);
-        out.textContent = Number(input.value).toFixed(2);
-        saveTmap();
-      });
-    });
-    document.getElementById('tmapReset').addEventListener('click', () => {
-      tmap = { mode: tmap.mode, offX:0, offY:0, scaleX:1, scaleY:1 };
-      saveTmap();
-      tmapControls.querySelectorAll('.calib-row').forEach((row, i) => {
-        const f = TMAP_FIELDS[i];
-        row.querySelector('input').value = tmap[f.key];
-        row.querySelector('output').textContent = Number(tmap[f.key]).toFixed(2);
-      });
-    });
-
-    // ---------- diagnostics ----------
-    document.getElementById('revealEmu').addEventListener('change', (e) => {
-      document.getElementById('ejsHostOuter').classList.toggle('reveal', e.target.checked);
-    });
-
-    // Runs the exact same injection path the phone triggers, but locally — so the phone
-    // and the network can be ruled out entirely.
-    document.getElementById('testTap').addEventListener('click', () => {
-      if (!srcCanvas) { setInputDiag('no canvas — start a game first'); return; }
-      sendTouch('pointerdown', 0.5, 0.5);
-      setTimeout(() => sendTouch('pointerup', 0.5, 0.5), 120);
-      setInputDiag('test tap injected');
-    });
-
-    const diagOut = document.getElementById('diagOut');
-    setInterval(() => {
-      // EmulatorJS can swap its canvas out (resize, core reinit). If ours is detached,
-      // injection would silently go nowhere — re-acquire it.
-      if (srcCanvas && !document.contains(srcCanvas)) {
-        const fresh = [...document.querySelectorAll('#game canvas')]
-          .sort((a,b) => (b.width*b.height) - (a.width*a.height))[0];
-        if (fresh) srcCanvas = fresh;
-      }
-      const gm = gameManager();
-      const rect = srcCanvas ? srcCanvas.getBoundingClientRect() : null;
-      const r = srcCanvas && srcCanvas.width ? getRegions(srcCanvas) : null;
-      diagOut.textContent = [
-        'canvas found : ' + (srcCanvas ? 'yes' : 'NO — game not started?'),
-        'canvas buffer: ' + (srcCanvas ? srcCanvas.width + ' x ' + srcCanvas.height : '-'),
-        'canvas onscreen rect: ' + (rect ? Math.round(rect.left) + ',' + Math.round(rect.top) + ' ' +
-             Math.round(rect.width) + 'x' + Math.round(rect.height) : '-'),
-        'rect usable  : ' + (rect && rect.width > 0 && rect.height > 0 ? 'yes' : 'NO — injection will fail'),
-        'bottom crop  : ' + (r ? `x${Math.round(r.bottom.sx)} y${Math.round(r.bottom.sy)} ` +
-             `${Math.round(r.bottom.sw)}x${Math.round(r.bottom.sh)}` : '-'),
-        'gameManager  : ' + (gm ? 'present' : 'MISSING'),
-        'simulateInput: ' + (gm && typeof gm.simulateInput === 'function' ? 'available' : 'unavailable'),
-        'touch msgs rx: ' + touchMsgCount + (lastTouchMsg
-             ? ` (last ${lastTouchMsg.state} ${lastTouchMsg.xf.toFixed(2)},${lastTouchMsg.yf.toFixed(2)})` : ''),
-        'touch map    : ' + tmap.mode + `  shift ${tmap.offX.toFixed(2)},${tmap.offY.toFixed(2)}` +
-             `  scale ${tmap.scaleX.toFixed(2)},${tmap.scaleY.toFixed(2)}`,
-        'last inject  : ' + (lastInject
-             ? `${lastInject.type} as ${lastInject.ptype} @ ${lastInject.x},${lastInject.y}` : 'none yet'),
-        '--- performance ---',
-        'display loop : ' + measuredFps + ' fps',
-        'crossOriginIsolated: ' + (self.crossOriginIsolated ? 'YES' : 'NO  <-- fix this for speed'),
-        'SharedArrayBuffer  : ' + (typeof SharedArrayBuffer !== 'undefined' ? 'available' : 'MISSING'),
-        'threaded core: ' + (window.EJS_threads ? 'enabled' : 'disabled (single-threaded = slow)'),
-        'cpu threads  : ' + (navigator.hardwareConcurrency || '?'),
-      ].join('\n');
-    }, 500);
-
-    // ---------- pairing: short, human-typeable room code used as the Peer ID ----------
-    const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I — avoids mistypes
-    const genCode = (len = 5) =>
-      Array.from({length: len}, () => CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
-
-    let peer = null, controllerPeerId = null, openTimer = null;
-
-    // Status messages go in the code box itself — if the code never arrives, the box has
-    // to say why rather than sitting on placeholder dashes forever.
-    function setCodeStatus(text, small) {
-      codeDisplay.style.fontSize = small ? '14px' : '';
-      codeDisplay.style.letterSpacing = small ? '.02em' : '';
-      codeDisplay.textContent = text;
-    }
-
-    function showCode(id) {
-      setCodeStatus(id, id.length > 8); // server-assigned fallback ids are long
-      const url = new URL(window.location.pathname, window.location.href);
-      url.searchParams.set('mode', 'controller');
-      url.searchParams.set('code', id);
-      joinLink.textContent = url.toString();
-
-      const qrHolder = document.getElementById('qr');
-      const qrImgUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=8&data=' + encodeURIComponent(url.toString());
-      qrHolder.innerHTML = `<img src="${qrImgUrl}" width="150" height="150" alt="Scan to join">`;
-      qrHolder.querySelector('img').addEventListener('error', () => {
-        qrHolder.innerHTML = `<div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;
-          text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:#333;padding:10px;">
-          QR unavailable — type the code instead</div>`;
-      }, { once:true });
-    }
-
-    // Claim a short code as the peer id, retrying with a fresh code if it's taken.
-    function startPeer(attempt = 0) {
-      clearTimeout(openTimer);
-      if (peer) { try { peer.destroy(); } catch (_) {} peer = null; }
-
-      if (attempt > 8) {
-        setCodeStatus('no free code — reload', true);
-        joinLink.textContent = "couldn't get a free pairing code — please reload the page";
-        return;
-      }
-
-      setCodeStatus('generating…', true);
-      peer = new Peer(ID_PREFIX + genCode(), PEER_OPTS);
-      const thisPeer = peer;
-
-      // If the broker never answers, say so instead of hanging on "generating…".
-      openTimer = setTimeout(() => {
-        if (thisPeer !== peer || thisPeer.open) return;
-        setCodeStatus('cannot reach server', true);
-        joinLink.textContent = 'signaling server unreachable — check network/ad-blocker, then reload';
-      }, 12000);
-
-      peer.on('open', (id) => {
-        clearTimeout(openTimer);
-        // Show only the human-typeable part; the prefix is an implementation detail.
-        showCode(id.startsWith(ID_PREFIX) ? id.slice(ID_PREFIX.length) : id);
-      });
-
-      peer.on('disconnected', () => {
-        if (thisPeer !== peer) return;
-        try { peer.reconnect(); } catch (_) {}
-      });
-
-      peer.on('error', (err) => {
-        console.error('PeerJS error:', err);
-        if (thisPeer !== peer) return;
-        const type = err && err.type ? err.type : 'unknown';
-        if (type === 'unavailable-id' || type === 'invalid-id') { startPeer(attempt + 1); return; }
-        clearTimeout(openTimer);
-        setCodeStatus('connection error', true);
-        joinLink.textContent = 'connection error (' + type + ') — retrying…';
-        setTimeout(() => startPeer(attempt + 1), 1200);
-      });
-
-      peer.on('connection', (conn) => {
-        controllerPeerId = conn.peer;
-        pairText.textContent = 'phone found — negotiating…';
-        watchIceState(conn);
-        conn.on('open', () => {
-          pairPill.classList.add('ok');
-          pairText.textContent = 'phone connected';
-          recDot.classList.add('live');
-          maybeCallController();
-        });
-        conn.on('data', (msg) => {
-          try {
-            const m = typeof msg === 'string' ? JSON.parse(msg) : msg;
-            if (m.type === 'button') {
-              if (m.key === 'STYLUS') setStylusPressed(m.state === 'down');
-              else pressButton(m.key, m.state === 'down');
-            } else if (m.type === 'stick') {
-              if (tmap.mode === 'joystick') setStick(m.x, m.y);
-            } else if (m.type === 'touch') {
-              if (tmap.mode === 'joystick') return; // stick drives the stylus instead
-              const kind = m.state === 'down' ? 'pointerdown' : m.state === 'up' ? 'pointerup' : 'pointermove';
-              touchMsgCount++;
-              lastTouchMsg = m;
-              sendTouch(kind, m.xf, m.yf);
-              if (m.state !== 'move') {
-                setInputDiag('touch ' + m.state + ' @ ' + m.xf.toFixed(2) + ',' + m.yf.toFixed(2));
-              }
-            }
-          } catch (e) { console.warn('bad message', e); }
-        });
-        conn.on('close', () => {
-          pairPill.classList.remove('ok');
-          pairText.textContent = 'phone disconnected';
-          recDot.classList.remove('live');
-        });
-        conn.on('error', (err) => {
-          console.error('DataConnection error:', err);
-          pairText.textContent = 'connection failed — try same Wi-Fi network';
-        });
-      });
-    }
-    startPeer();
-
-    function watchIceState(conn) {
-      const pc = conn.peerConnection;
-      if (!pc) return;
-      pc.addEventListener('iceconnectionstatechange', () => {
-        const state = pc.iceConnectionState;
-        console.log('ICE connection state:', state);
-        if (state === 'checking') pairText.textContent = 'connecting…';
-        if (state === 'connected' || state === 'completed') {
-          pairPill.classList.add('ok');
-          pairText.textContent = 'phone connected';
-        }
-        // 'disconnected' is usually a transient blip — try to recover before reporting failure.
-        if (state === 'disconnected') {
-          pairText.textContent = 'link unstable — recovering…';
-          setTimeout(() => {
-            if (pc.iceConnectionState === 'disconnected' && pc.restartIce) {
-              try { pc.restartIce(); } catch (_) {}
-            }
-          }, 2000);
-        }
-        if (state === 'failed') {
-          pairPill.classList.remove('ok');
-          pairText.textContent = 'no relay available — see TURN note in the code';
-          if (pc.restartIce) { try { pc.restartIce(); } catch (_) {} }
-        }
-      });
-    }
-
-    function maybeCallController() {
-      if (bottomStream && controllerPeerId && peer) peer.call(controllerPeerId, bottomStream);
-    }
-  }
-
-  // ============================================================
-  // CONTROLLER (phone)
-  // ============================================================
-  function initController(opts) {
-    const codeInput = document.getElementById('codeInput');
-    const joinScreen = document.getElementById('joinScreen');
-    const playArea = document.getElementById('playArea');
-    const joinBtn = document.getElementById('joinBtn');
-    const connPill = document.getElementById('connPill');
-    const connText = document.getElementById('connText');
-    const video = document.getElementById('video');
-    const touchLayer = document.getElementById('touchLayer');
-    const screenHint = document.getElementById('screenHint');
-
-    let conn = null;
-    const peer = new Peer(null, PEER_OPTS);
-    peer.on('error', (err) => {
-      console.error('PeerJS error:', err);
-      connText.textContent = 'connection error (' + (err && err.type ? err.type : 'unknown') + ')';
-      connPill.classList.remove('ok');
-    });
-
-    const normalizeCode = (c) => (c || '').trim().toUpperCase();
-
-    // Fullscreen + landscape must be requested from a real user gesture (the tap on
-    // Connect). Orientation lock is unsupported on iOS Safari, which is why the
-    // rotate-your-phone overlay exists as the fallback.
-    async function enterImmersive() {
-      const el = document.documentElement;
-      try {
-        if (el.requestFullscreen) await el.requestFullscreen({ navigationUI: 'hide' });
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      } catch (_) {}
-      try {
-        if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
-      } catch (_) {}
-    }
-
-    function connectTo(code) {
-      code = normalizeCode(code);
-      if (!code) return;
-      document.body.classList.add('playing');
-      enterImmersive();
-      playArea.style.display = 'flex';
-      joinScreen.style.display = 'none';
-      const start = () => {
-        connText.textContent = 'connecting…';
-        conn = peer.connect(ID_PREFIX + code, { reliable: true });
-        conn.on('open', () => { connPill.classList.add('ok'); connText.textContent = 'connected'; });
-        conn.on('close', () => { connPill.classList.remove('ok'); connText.textContent = 'disconnected'; });
-        conn.on('error', (err) => {
-          console.error('DataConnection error:', err);
-          connText.textContent = 'connection failed — check the code and try again';
-        });
-        const pc = conn.peerConnection;
-        if (pc) {
-          pc.addEventListener('iceconnectionstatechange', () => {
-            const state = pc.iceConnectionState;
-            console.log('ICE connection state:', state);
-            if (state === 'checking') connText.textContent = 'negotiating…';
-            if (state === 'connected' || state === 'completed') {
-              connPill.classList.add('ok');
-              connText.textContent = 'connected';
-            }
-            if (state === 'disconnected') {
-              connText.textContent = 'unstable — recovering…';
-              setTimeout(() => {
-                if (pc.iceConnectionState === 'disconnected' && pc.restartIce) {
-                  try { pc.restartIce(); } catch (_) {}
-                }
-              }, 2000);
-            }
-            if (state === 'failed') {
-              connPill.classList.remove('ok');
-              connText.textContent = 'no relay available — needs TURN';
-              if (pc.restartIce) { try { pc.restartIce(); } catch (_) {} }
-            }
-          });
-        }
-      };
-      if (peer.open) start(); else peer.on('open', start);
-    }
-
-    peer.on('call', (call) => {
-      call.answer();
-      call.on('stream', (stream) => {
-        video.srcObject = stream;
-        screenHint.style.display = 'none';
-      });
-    });
-
-    joinBtn.addEventListener('click', () => connectTo(codeInput.value));
-    codeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') connectTo(codeInput.value); });
-    codeInput.addEventListener('input', () => { codeInput.value = codeInput.value.toUpperCase(); });
-
-    fillAndConnect = (code) => { codeInput.value = normalizeCode(code); connectTo(code); };
-    if (opts && opts.autoCode) fillAndConnect(opts.autoCode);
-
-    // Auto-connecting from a scanned QR isn't a user gesture, so fullscreen gets refused.
-    // Retry once on the first touch anywhere in the play area.
-    playArea.addEventListener('pointerdown', function once() {
-      if (!document.fullscreenElement) enterImmersive();
-      playArea.removeEventListener('pointerdown', once);
-    }, { capture: true });
-
-    function send(obj) { if (conn && conn.open) conn.send(JSON.stringify(obj)); }
-
-    // CSS alone doesn't stop every selection path on mobile — Safari in particular still
-    // fires selection and callout gestures. Suppress them across the play area.
-    ['selectstart', 'contextmenu', 'dragstart'].forEach(type => {
-      playArea.addEventListener(type, (e) => e.preventDefault());
-    });
-    // Block iOS pinch/double-tap zoom gestures while playing.
-    ['gesturestart', 'gesturechange', 'gestureend'].forEach(type => {
-      playArea.addEventListener(type, (e) => e.preventDefault());
-    });
-    let lastTouchEnd = 0;
-    playArea.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTouchEnd < 300) e.preventDefault(); // double-tap zoom
-      lastTouchEnd = now;
-    }, { passive: false });
-    // Stop the page itself from scrolling/rubber-banding under the controls.
-    playArea.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-
-    // ---------- touch screen ----------
-    // The video is object-fit:contain inside a 256:192 box, so the picture may be inset
-    // if the box is ever not exactly 4:3. Map against the *rendered picture* rather than
-    // the element box, otherwise taps land offset from where the stylus should be.
-    function relCoords(e) {
-      // Prefer the video's rendered picture box (object-fit:contain can inset it), but fall
-      // back to the touch layer if the video hasn't reported a size yet. Dividing by a zero
-      // width here would produce NaN, and NaN coordinates end up pinned at 0,0 downstream.
-      let rect = video.getBoundingClientRect();
-      if (!rect.width || !rect.height) rect = touchLayer.getBoundingClientRect();
-      if (!rect.width || !rect.height) return null;
-
-      const vw = video.videoWidth || 256, vh = video.videoHeight || 192;
-      const scale = Math.min(rect.width / vw, rect.height / vh);
-      let dw = vw * scale, dh = vh * scale;
-      if (!(dw > 0) || !(dh > 0)) { dw = rect.width; dh = rect.height; }
-
-      const ox = rect.left + (rect.width - dw) / 2;
-      const oy = rect.top + (rect.height - dh) / 2;
-      const xf = Math.min(1, Math.max(0, (e.clientX - ox) / dw));
-      const yf = Math.min(1, Math.max(0, (e.clientY - oy) / dh));
-      if (!Number.isFinite(xf) || !Number.isFinite(yf)) return null;
-      return { xf, yf };
-    }
-
-    let activePointer = null;
-    // For analog-stick stylus mode the finger acts as a trackpad: movement is sent as a
-    // stick direction, so the DS's own cursor tracks the drag. Absolute taps can't be used
-    // there because the stick is relative.
-    let dragOrigin = null;
-    const STICK_RADIUS = 60; // px of finger travel for a full-deflection stick push
-
-    touchLayer.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      activePointer = e.pointerId;
-      try { touchLayer.setPointerCapture(e.pointerId); } catch (_) {}
-      dragOrigin = { x: e.clientX, y: e.clientY };
-      const p = relCoords(e);
-      if (p) send({ type:'touch', state:'down', xf: p.xf, yf: p.yf });
-      if (navigator.vibrate) navigator.vibrate(8);
-    });
-    touchLayer.addEventListener('pointermove', (e) => {
-      if (e.pointerId !== activePointer) return;
-      e.preventDefault();
-      const p = relCoords(e);
-      if (p) send({ type:'touch', state:'move', xf: p.xf, yf: p.yf });
-      if (dragOrigin) {
-        send({
-          type: 'stick',
-          x: Math.max(-1, Math.min(1, (e.clientX - dragOrigin.x) / STICK_RADIUS)),
-          y: Math.max(-1, Math.min(1, (e.clientY - dragOrigin.y) / STICK_RADIUS)),
-        });
-      }
-    });
-    function endTouch(e) {
-      if (e.pointerId !== activePointer) return;
-      e.preventDefault();
-      activePointer = null;
-      dragOrigin = null;
-      send({ type:'stick', x:0, y:0 }); // centre the stick so the cursor stops drifting
-      const p = relCoords(e);
-      send({ type:'touch', state:'up', xf: p ? p.xf : 0.5, yf: p ? p.yf : 0.5 });
-    }
-    touchLayer.addEventListener('pointerup', endTouch);
-    touchLayer.addEventListener('pointercancel', endTouch);
-
-    // ---------- buttons ----------
-    const stylusBtn = document.getElementById('stylusBtn');
-    const stylusDown = (e) => {
-      e.preventDefault();
-      stylusBtn.classList.add('active');
-      send({ type:'button', key:'STYLUS', state:'down' });
-      if (navigator.vibrate) navigator.vibrate(10);
-    };
-    const stylusUp = (e) => {
-      e.preventDefault();
-      stylusBtn.classList.remove('active');
-      send({ type:'button', key:'STYLUS', state:'up' });
-    };
-    stylusBtn.addEventListener('pointerdown', stylusDown);
-    stylusBtn.addEventListener('pointerup', stylusUp);
-    stylusBtn.addEventListener('pointercancel', stylusUp);
-    stylusBtn.addEventListener('pointerleave', stylusUp);
-
     document.querySelectorAll('[data-key]').forEach((btn) => {
       const key = btn.dataset.key;
-      const down = (e) => {
-        e.preventDefault();
-        btn.classList.add('active');
-        send({ type:'button', key, state:'down' });
-        if (navigator.vibrate) navigator.vibrate(6);
-      };
-      const up = (e) => {
-        e.preventDefault();
-        btn.classList.remove('active');
-        send({ type:'button', key, state:'up' });
-      };
-      btn.addEventListener('pointerdown', down);
+      const dn = (e) => { e.preventDefault(); btn.classList.add('active'); press(key, true);
+                          if (navigator.vibrate) navigator.vibrate(6); };
+      const up = (e) => { e.preventDefault(); btn.classList.remove('active'); press(key, false); };
+      btn.addEventListener('pointerdown', dn);
       btn.addEventListener('pointerup', up);
       btn.addEventListener('pointercancel', up);
       btn.addEventListener('pointerleave', up);
       btn.addEventListener('contextmenu', (e) => e.preventDefault());
     });
-  }
-  // ============================================================
-  // TOUCH TEST (diagnostic)
-  // ============================================================
-  function initTest() {
-    const logEl = document.getElementById('tLog');
-    const log = (m) => { logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; };
 
-    let romURL = null, biosURL = null, canvas = null, lastRealClick = null;
-
-    document.getElementById('tRom').addEventListener('change', (e) => {
-      if (e.target.files[0]) {
-        romURL = URL.createObjectURL(e.target.files[0]);
-        document.getElementById('tStart').disabled = false;
-        log('ROM loaded: ' + e.target.files[0].name);
-      }
-    });
-    document.getElementById('tBios').addEventListener('change', (e) => {
-      if (e.target.files[0]) { biosURL = URL.createObjectURL(e.target.files[0]); log('BIOS loaded.'); }
-    });
-
-    document.getElementById('tStart').addEventListener('click', () => {
-      document.getElementById('tStart').disabled = true;
-      log('starting core…');
-      window.EJS_player = '#testGame';
-      window.EJS_core = 'nds';
-      window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-      window.EJS_gameUrl = romURL;
-      if (biosURL) window.EJS_biosUrl = biosURL;
-      window.EJS_startOnLoaded = true;
-      if (self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined') {
-        window.EJS_threads = true;
-        log('cross-origin isolated: threaded core ENABLED');
-      } else {
-        log('NOT cross-origin isolated: single-threaded (slow)');
-      }
-      window.EJS_onGameStart = () => { log('game started.'); findCanvas(); };
-      const sc = document.createElement('script');
-      sc.src = window.EJS_pathtodata + 'loader.js';
-      document.body.appendChild(sc);
-    });
-
-    function findCanvas(tries = 0) {
-      const list = [...document.querySelectorAll('#testGame canvas')]
-        .sort((a, b) => (b.width * b.height) - (a.width * a.height));
-      canvas = list[0];
-      if (!canvas || !canvas.width) {
-        if (tries < 50) return setTimeout(() => findCanvas(tries + 1), 200);
-        log('ERROR: no canvas found.');
-        return;
-      }
-      const r = canvas.getBoundingClientRect();
-      log('canvas: buffer ' + canvas.width + 'x' + canvas.height +
-          ', on-screen ' + Math.round(r.width) + 'x' + Math.round(r.height) +
-          ' (' + list.length + ' canvas elements)');
-      document.getElementById('tInjectCenter').disabled = false;
-      document.getElementById('tInjectFull').disabled = false;
-
-      canvas.addEventListener('mousedown', (e) => {
-        if (!e.isTrusted) return;
-        lastRealClick = { x: e.clientX, y: e.clientY };
-        document.getElementById('tInjectFollow').disabled = false;
-        const rr = canvas.getBoundingClientRect();
-        log('REAL mousedown @ ' + Math.round(e.clientX) + ',' + Math.round(e.clientY) +
-            ' -> canvas px ' +
-            Math.round((e.clientX - rr.left) / rr.width * canvas.width) + ',' +
-            Math.round((e.clientY - rr.top) / rr.height * canvas.height));
-      });
-    }
-
-    function injectTap(clientX, clientY) {
-      if (!canvas) return;
-      const fire = (pType, mType, buttons) => {
-        const opts = {
-          clientX, clientY, screenX: clientX, screenY: clientY,
-          pageX: clientX + scrollX, pageY: clientY + scrollY,
-          bubbles: true, cancelable: true, composed: true, view: window, detail: 1,
-          pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons,
-        };
-        try { canvas.dispatchEvent(new PointerEvent(pType, opts)); } catch (_) {}
-        try { canvas.dispatchEvent(new MouseEvent(mType, opts)); } catch (_) {}
-        try { document.dispatchEvent(new MouseEvent(mType, opts)); } catch (_) {}
-      };
-      log('injecting @ ' + Math.round(clientX) + ',' + Math.round(clientY) + ' …');
-      fire('pointermove', 'mousemove', 0);
-      fire('pointerdown', 'mousedown', 1);
-      setTimeout(() => {
-        fire('pointermove', 'mousemove', 1);
-        setTimeout(() => { fire('pointerup', 'mouseup', 0); log('sequence complete.'); }, 60);
-      }, 60);
-    }
-
-    document.getElementById('tInjectCenter').addEventListener('click', () => {
-      const r = canvas.getBoundingClientRect();
-      injectTap(r.left + r.width * 0.5, r.top + r.height * 0.75);
-    });
-    document.getElementById('tInjectFull').addEventListener('click', () => {
-      const r = canvas.getBoundingClientRect();
-      injectTap(r.left + r.width * 0.5, r.top + r.height * 0.5);
-    });
-    document.getElementById('tInjectFollow').addEventListener('click', () => {
-      if (lastRealClick) injectTap(lastRealClick.x, lastRealClick.y);
-    });
+    // Suppress selection / zoom gestures around the controls, but leave the emulator
+    // canvas itself completely untouched so its own touch handling works normally.
+    ['selectstart','dragstart'].forEach(t =>
+      phonePlay.addEventListener(t, (e) => e.preventDefault()));
+    ['gesturestart','gesturechange','gestureend'].forEach(t =>
+      phonePlay.addEventListener(t, (e) => e.preventDefault()));
   }
 })();
 </script>
