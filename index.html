@@ -363,6 +363,11 @@
       <h3>Phone</h3>
       <p>Enter the code shown on your laptop to become the touch screen and controls.</p>
     </div>
+    <div class="mode-card" data-mode="test">
+      <div class="icon">🔧</div>
+      <h3>Touch test</h3>
+      <p>Diagnostic tool. Shows both DS screens unhidden so you can compare a real mouse click against an injected tap.</p>
+    </div>
   </div>
 </div>
 
@@ -432,7 +437,22 @@
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-bottom:10px;">
           <input type="checkbox" id="revealEmu"> Show the real emulator canvas (click it with your mouse to test)
         </label>
-        <button class="btn" id="testTap" style="margin-bottom:10px;">Simulate a tap at bottom-screen centre</button>
+        <button class="btn" id="testTap" style="margin-bottom:10px;">Simulate a tap at touch-screen centre</button>
+
+        <div class="field">
+          <label for="tmapMode">Touch surface mapping</label>
+          <select id="tmapMode">
+            <option value="full">Whole canvas is the touch surface (try this first)</option>
+            <option value="bottom">Only the lower screen area</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:8px;">
+          Tick "show the real emulator canvas" above, press the test tap, and watch where the
+          game's own touch marker lands. Adjust below until the marker sits exactly at the
+          centre of the lower screen. Saved automatically.
+        </div>
+        <div id="tmapControls"></div>
+        <button class="btn" id="tmapReset" style="background:#2c303a;margin-bottom:10px;">Reset calibration</button>
         <div class="field">
           <label for="ptrType">Injected pointer type</label>
           <select id="ptrType">
@@ -528,6 +548,57 @@
   <p>Rotate your phone to landscape<br>to play</p>
 </div>
 
+<!-- ============ TOUCH TEST (diagnostic) VIEW ============ -->
+<div id="testView" style="display:none; width:100%; max-width:1000px; padding:20px;">
+  <h1 style="font-family:'Space Mono',monospace;font-size:18px;margin:0 0 4px;">
+    ds<span style="color:var(--blue);">·</span>link <span style="color:var(--dim);font-weight:400;">/ touch test</span>
+  </h1>
+  <p style="color:var(--dim);font-size:13px;margin:0 0 18px;max-width:720px;line-height:1.6;">
+    Isolates one question: do synthetic mouse events reach the DS core, and where do they land?
+    No phone, no network, no cropping — both DS screens are shown fully unhidden.
+  </p>
+
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+    <div id="testGame" style="width:384px;height:576px;background:#000;border:2px solid var(--blue);border-radius:6px;"></div>
+
+    <div style="flex:1;min-width:320px;">
+      <div class="card" style="margin-bottom:12px;">
+        <b style="font-size:13px;">Step 1.</b> Load a DS ROM (plus BIOS zip if needed), then start.
+        <div style="margin-top:10px;">
+          <input type="file" id="tRom" accept=".nds,.zip" style="margin-bottom:8px;">
+          <input type="file" id="tBios" accept=".zip" style="margin-bottom:8px;">
+          <button class="btn" id="tStart" disabled>Start emulator</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <b style="font-size:13px;">Step 2 — real mouse.</b>
+        <span style="color:var(--dim);font-size:12px;">
+          Click the <b>lower</b> screen with your mouse. The game should respond and its touch
+          marker should appear under the cursor.
+        </span>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <b style="font-size:13px;">Step 3 — injected tap.</b>
+        <span style="color:var(--dim);font-size:12px;">
+          Move the cursor off the canvas, then inject. Watch where the marker lands versus
+          where you aimed — that difference is what the calibration sliders correct.
+        </span>
+        <div style="margin-top:10px;">
+          <button class="btn" id="tInjectCenter" disabled>Tap: lower-screen centre</button>
+          <button class="btn" id="tInjectFull" disabled>Tap: canvas centre</button>
+          <button class="btn" id="tInjectFollow" disabled>Tap: where I last clicked</button>
+        </div>
+      </div>
+
+      <pre id="tLog" style="background:#12151a;border:1px solid #2c303a;border-radius:8px;padding:12px;
+        font-family:'Space Mono',monospace;font-size:11px;line-height:1.5;color:var(--dim);
+        height:260px;overflow:auto;white-space:pre-wrap;margin:0;">ready.</pre>
+    </div>
+  </div>
+</div>
+
 <script>
 (() => {
   // ---------- shared: PeerJS loading + ICE config ----------
@@ -574,11 +645,16 @@
   const modeSelect = document.getElementById('modeSelect');
   const hostView = document.getElementById('hostView');
   const controllerView = document.getElementById('controllerView');
-  let hostInited = false, controllerInited = false;
+  let hostInited = false, controllerInited = false, testInited = false;
   let fillAndConnect = () => {};
 
   function chooseMode(mode, opts) {
     modeSelect.style.display = 'none';
+    if (mode === 'test') {
+      document.getElementById('testView').style.display = 'block';
+      if (!testInited) { testInited = true; initTest(); }
+      return;
+    }
     if (mode === 'host') {
       hostView.style.display = 'flex';
       if (!hostInited) { hostInited = true; onPeerjsReady(initHost); }
@@ -595,6 +671,7 @@
   const qp = new URLSearchParams(location.search);
   if (qp.get('mode') === 'controller') chooseMode('controller', { autoCode: qp.get('code') });
   else if (qp.get('mode') === 'host') chooseMode('host');
+  else if (qp.get('mode') === 'test') chooseMode('test');
 
   // ============================================================
   // HOST (laptop)
@@ -851,13 +928,37 @@
     // xf/yf already refer to the bottom screen only, so they map into the bottom crop box.
     let touchDown = false;
     let lastInject = null, lastTouchMsg = null, touchMsgCount = 0;
+
+    // How a normalized point on the phone's touch screen maps onto the emulator canvas.
+    // 'bottom' assumes the core only treats the lower screen area as the touch surface.
+    // 'full' assumes the core stretches the whole canvas onto the touch screen — which is
+    // what melonDS/RetroArch actually does in some layouts, and produces a marker that
+    // lands low and right of where you aimed if you assumed 'bottom'.
+    const TMAP_KEY = 'ds-link-touchmap-v1';
+    let tmap = JSON.parse(localStorage.getItem(TMAP_KEY) || 'null') ||
+               { mode:'full', offX:0, offY:0, scaleX:1, scaleY:1 };
+    const saveTmap = () => localStorage.setItem(TMAP_KEY, JSON.stringify(tmap));
     function sendTouch(kind, xf, yf) {
       if (!srcCanvas) return;
       const rect = srcCanvas.getBoundingClientRect();
       if (!rect.width || !rect.height) return; // canvas not laid out yet
-      const bot = getRegions(srcCanvas).bottom;
-      const sx = bot.sx + xf * bot.sw;
-      const sy = bot.sy + yf * bot.sh;
+
+      // Apply calibration in normalized space first.
+      let cx = 0.5 + (xf - 0.5) * tmap.scaleX + tmap.offX;
+      let cy = 0.5 + (yf - 0.5) * tmap.scaleY + tmap.offY;
+      cx = Math.min(1, Math.max(0, cx));
+      cy = Math.min(1, Math.max(0, cy));
+
+      let sx, sy;
+      if (tmap.mode === 'full') {
+        // Whole canvas is the touch surface.
+        sx = cx * srcCanvas.width;
+        sy = cy * srcCanvas.height;
+      } else {
+        const bot = getRegions(srcCanvas).bottom;
+        sx = bot.sx + cx * bot.sw;
+        sy = bot.sy + cy * bot.sh;
+      }
       const clientX = rect.left + (sx / srcCanvas.width) * rect.width;
       const clientY = rect.top + (sy / srcCanvas.height) * rect.height;
 
@@ -912,6 +1013,42 @@
       } catch (_) { /* TouchEvent not constructible here */ }
     }
 
+    // ---------- touch mapping calibration ----------
+    const tmapModeSel = document.getElementById('tmapMode');
+    tmapModeSel.value = tmap.mode;
+    tmapModeSel.addEventListener('change', () => { tmap.mode = tmapModeSel.value; saveTmap(); });
+
+    const tmapControls = document.getElementById('tmapControls');
+    const TMAP_FIELDS = [
+      { key:'offX',   label:'X shift', min:-0.5, max:0.5, step:0.005 },
+      { key:'offY',   label:'Y shift', min:-0.5, max:0.5, step:0.005 },
+      { key:'scaleX', label:'X scale', min:0.25, max:2,   step:0.01  },
+      { key:'scaleY', label:'Y scale', min:0.25, max:2,   step:0.01  },
+    ];
+    TMAP_FIELDS.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'calib-row';
+      row.innerHTML = `<label>${f.label}</label>
+        <input type="range" min="${f.min}" max="${f.max}" step="${f.step}" value="${tmap[f.key]}">
+        <output>${Number(tmap[f.key]).toFixed(2)}</output>`;
+      tmapControls.appendChild(row);
+      const input = row.querySelector('input'), out = row.querySelector('output');
+      input.addEventListener('input', () => {
+        tmap[f.key] = Number(input.value);
+        out.textContent = Number(input.value).toFixed(2);
+        saveTmap();
+      });
+    });
+    document.getElementById('tmapReset').addEventListener('click', () => {
+      tmap = { mode: tmap.mode, offX:0, offY:0, scaleX:1, scaleY:1 };
+      saveTmap();
+      tmapControls.querySelectorAll('.calib-row').forEach((row, i) => {
+        const f = TMAP_FIELDS[i];
+        row.querySelector('input').value = tmap[f.key];
+        row.querySelector('output').textContent = Number(tmap[f.key]).toFixed(2);
+      });
+    });
+
     // ---------- diagnostics ----------
     document.getElementById('revealEmu').addEventListener('change', (e) => {
       document.getElementById('ejsHostOuter').classList.toggle('reveal', e.target.checked);
@@ -950,6 +1087,8 @@
         'simulateInput: ' + (gm && typeof gm.simulateInput === 'function' ? 'available' : 'unavailable'),
         'touch msgs rx: ' + touchMsgCount + (lastTouchMsg
              ? ` (last ${lastTouchMsg.state} ${lastTouchMsg.xf.toFixed(2)},${lastTouchMsg.yf.toFixed(2)})` : ''),
+        'touch map    : ' + tmap.mode + `  shift ${tmap.offX.toFixed(2)},${tmap.offY.toFixed(2)}` +
+             `  scale ${tmap.scaleX.toFixed(2)},${tmap.scaleY.toFixed(2)}`,
         'last inject  : ' + (lastInject
              ? `${lastInject.type} as ${lastInject.ptype} @ ${lastInject.x},${lastInject.y}` : 'none yet'),
         '--- performance ---',
@@ -1294,6 +1433,109 @@
       btn.addEventListener('pointercancel', up);
       btn.addEventListener('pointerleave', up);
       btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    });
+  }
+  // ============================================================
+  // TOUCH TEST (diagnostic)
+  // ============================================================
+  function initTest() {
+    const logEl = document.getElementById('tLog');
+    const log = (m) => { logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; };
+
+    let romURL = null, biosURL = null, canvas = null, lastRealClick = null;
+
+    document.getElementById('tRom').addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        romURL = URL.createObjectURL(e.target.files[0]);
+        document.getElementById('tStart').disabled = false;
+        log('ROM loaded: ' + e.target.files[0].name);
+      }
+    });
+    document.getElementById('tBios').addEventListener('change', (e) => {
+      if (e.target.files[0]) { biosURL = URL.createObjectURL(e.target.files[0]); log('BIOS loaded.'); }
+    });
+
+    document.getElementById('tStart').addEventListener('click', () => {
+      document.getElementById('tStart').disabled = true;
+      log('starting core…');
+      window.EJS_player = '#testGame';
+      window.EJS_core = 'nds';
+      window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+      window.EJS_gameUrl = romURL;
+      if (biosURL) window.EJS_biosUrl = biosURL;
+      window.EJS_startOnLoaded = true;
+      if (self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined') {
+        window.EJS_threads = true;
+        log('cross-origin isolated: threaded core ENABLED');
+      } else {
+        log('NOT cross-origin isolated: single-threaded (slow)');
+      }
+      window.EJS_onGameStart = () => { log('game started.'); findCanvas(); };
+      const sc = document.createElement('script');
+      sc.src = window.EJS_pathtodata + 'loader.js';
+      document.body.appendChild(sc);
+    });
+
+    function findCanvas(tries = 0) {
+      const list = [...document.querySelectorAll('#testGame canvas')]
+        .sort((a, b) => (b.width * b.height) - (a.width * a.height));
+      canvas = list[0];
+      if (!canvas || !canvas.width) {
+        if (tries < 50) return setTimeout(() => findCanvas(tries + 1), 200);
+        log('ERROR: no canvas found.');
+        return;
+      }
+      const r = canvas.getBoundingClientRect();
+      log('canvas: buffer ' + canvas.width + 'x' + canvas.height +
+          ', on-screen ' + Math.round(r.width) + 'x' + Math.round(r.height) +
+          ' (' + list.length + ' canvas elements)');
+      document.getElementById('tInjectCenter').disabled = false;
+      document.getElementById('tInjectFull').disabled = false;
+
+      canvas.addEventListener('mousedown', (e) => {
+        if (!e.isTrusted) return;
+        lastRealClick = { x: e.clientX, y: e.clientY };
+        document.getElementById('tInjectFollow').disabled = false;
+        const rr = canvas.getBoundingClientRect();
+        log('REAL mousedown @ ' + Math.round(e.clientX) + ',' + Math.round(e.clientY) +
+            ' -> canvas px ' +
+            Math.round((e.clientX - rr.left) / rr.width * canvas.width) + ',' +
+            Math.round((e.clientY - rr.top) / rr.height * canvas.height));
+      });
+    }
+
+    function injectTap(clientX, clientY) {
+      if (!canvas) return;
+      const fire = (pType, mType, buttons) => {
+        const opts = {
+          clientX, clientY, screenX: clientX, screenY: clientY,
+          pageX: clientX + scrollX, pageY: clientY + scrollY,
+          bubbles: true, cancelable: true, composed: true, view: window, detail: 1,
+          pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons,
+        };
+        try { canvas.dispatchEvent(new PointerEvent(pType, opts)); } catch (_) {}
+        try { canvas.dispatchEvent(new MouseEvent(mType, opts)); } catch (_) {}
+        try { document.dispatchEvent(new MouseEvent(mType, opts)); } catch (_) {}
+      };
+      log('injecting @ ' + Math.round(clientX) + ',' + Math.round(clientY) + ' …');
+      fire('pointermove', 'mousemove', 0);
+      fire('pointerdown', 'mousedown', 1);
+      setTimeout(() => {
+        fire('pointermove', 'mousemove', 1);
+        setTimeout(() => { fire('pointerup', 'mouseup', 0); log('sequence complete.'); }, 60);
+      }, 60);
+    }
+
+    document.getElementById('tInjectCenter').addEventListener('click', () => {
+      const r = canvas.getBoundingClientRect();
+      injectTap(r.left + r.width * 0.5, r.top + r.height * 0.75);
+    });
+    document.getElementById('tInjectFull').addEventListener('click', () => {
+      const r = canvas.getBoundingClientRect();
+      injectTap(r.left + r.width * 0.5, r.top + r.height * 0.5);
+    });
+    document.getElementById('tInjectFollow').addEventListener('click', () => {
+      if (lastRealClick) injectTap(lastRealClick.x, lastRealClick.y);
     });
   }
 })();
